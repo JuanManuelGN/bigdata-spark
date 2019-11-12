@@ -5,6 +5,10 @@ import features.AddColumnToDF.spark
 import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.types._
 
+/**
+  * En esta clase está centralizada la creación de los dataframes que el resto de componentes van
+  * a necesitar para su ejecución
+  */
 case class CreateDataframe() extends SparkConfig {
 
   /**
