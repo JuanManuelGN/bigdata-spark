@@ -1,4 +1,4 @@
-name := "spark-for-dummies"
+name := "spark-basic"
 
 version := "0.1"
 
