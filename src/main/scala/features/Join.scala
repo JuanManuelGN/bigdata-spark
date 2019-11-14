@@ -92,5 +92,18 @@ object Join extends App {
 
     left.join(right, Seq("id"), "full")
   }
+}
+
+case class JoinWithEmptyDf() {
+  def doJoin(df: DataFrame, emptyDf: DataFrame): DataFrame =
+    df.join(emptyDf, Seq("id"), "left_anti")
+}
+object JoinWithEmptyDf extends App {
+  val df = CreateDataframe.getIntDf
+  val emptyDf = CreateDataframe.getEmptyDf
+
+  val dfJoined = JoinWithEmptyDf().doJoin(df, emptyDf)
+
+  dfJoined.show
 
 }
