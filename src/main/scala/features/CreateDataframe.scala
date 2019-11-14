@@ -49,7 +49,12 @@ case class CreateDataframe() extends SparkConfig {
 
   private val timeSchema = StructType(List(StructField("unix", LongType)))
   private val timeRaw = List(Row(1435655706000L))
-  private val timeDf = spark.createDataFrame(spark.sparkContext.parallelize(timeRaw), timeSchema)
+  private val timeUnixDf = spark.createDataFrame(spark.sparkContext.parallelize(timeRaw), timeSchema)
+
+  private val timeUnixSecondsSchema = StructType(List(StructField("unixSeconds", LongType)))
+  private val timeUnixSecondsRaw = List(Row(1435655706L))
+  private val timeUnixSecondsDf =
+    spark.createDataFrame(spark.sparkContext.parallelize(timeUnixSecondsRaw), timeUnixSecondsSchema)
 
   private val timeIntegerSchema = StructType(List(StructField("id", IntegerType),
                                                   StructField("timeIntFormat", IntegerType)))
@@ -103,17 +108,18 @@ case class CreateDataframe() extends SparkConfig {
 object CreateDataframe extends App {
 
   val dfBuilder = CreateDataframe()
-  def getCardsDF = dfBuilder.cardDF
-  def getNumberDF = (dfBuilder.df1, dfBuilder.df2)
-  def getTimeDf: DataFrame = dfBuilder.timeDf
-  def getNumericalDf: DataFrame = dfBuilder.numericalDf
-  def getIncomingDf: DataFrame = dfBuilder.incomingDf
-  def getStoredDf: DataFrame = dfBuilder.storedDf
-  def getTimeIntegerFormatDf: DataFrame = dfBuilder.timeIntegerDf
-  def getTimeIntegerFormatDf2: DataFrame = dfBuilder.timeIntegerDf2
-  def getLongDf: DataFrame = dfBuilder.longDf
-  def getIntDf: DataFrame = dfBuilder.intDf
-  def getEmptyDf: DataFrame = dfBuilder.emptyDf
-  def getMinus1Df: DataFrame = dfBuilder.minus1Df
-  def getMinus2Df: DataFrame = dfBuilder.minus2Df
+  def getCardsDF = CreateDataframe().cardDF
+  def getNumberDF = (CreateDataframe().df1, CreateDataframe().df2)
+  def getTimeUnixDf: DataFrame = CreateDataframe().timeUnixDf
+  def getTimeUnixSecondsDf: DataFrame = CreateDataframe().timeUnixSecondsDf
+  def getNumericalDf: DataFrame = CreateDataframe().numericalDf
+  def getIncomingDf: DataFrame = CreateDataframe().incomingDf
+  def getStoredDf: DataFrame = CreateDataframe().storedDf
+  def getTimeIntegerFormatDf: DataFrame = CreateDataframe().timeIntegerDf
+  def getTimeIntegerFormatDf2: DataFrame = CreateDataframe().timeIntegerDf2
+  def getLongDf: DataFrame = CreateDataframe().longDf
+  def getIntDf: DataFrame = CreateDataframe().intDf
+  def getEmptyDf: DataFrame = CreateDataframe().emptyDf
+  def getMinus1Df: DataFrame = CreateDataframe().minus1Df
+  def getMinus2Df: DataFrame = CreateDataframe().minus2Df
 }
