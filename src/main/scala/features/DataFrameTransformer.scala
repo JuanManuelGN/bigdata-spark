@@ -16,7 +16,31 @@ class TimeTransformer {
     val unixColumnName = unixDf.columns.head
     val columnName = "YYYYMMDD"
     val format = "yyyyMMdd"
-    unixDf.withColumn(columnName, from_unixtime(col(unixColumnName) / 1000, format).cast(IntegerType))
+    unixDf
+      .withColumn(columnName, from_unixtime(col(unixColumnName) / 1000, format).cast(IntegerType))
+  }
+
+  /**
+    *
+    * @param unixDf dataframe con una columna de tiempo en formato unix (milisegundos)
+    * @return
+    */
+  def unixToDate(unixDf: DataFrame): DataFrame = {
+    val unixColumnName = unixDf.columns.head
+    val format = "yyyyMMdd"
+
+    unixDf
+      .withColumn("DATE", to_date(from_unixtime(col(unixColumnName)/1000), "yyyy-MM-dd"))
+//      .withColumn("a", from_unixtime(col(unixColumnName) / 1000, format).cast(IntegerType))
+//        .withColumn("c", to_date(col("a").cast(StringType), format))
+//      .select(to_date(col(unixColumnName).cast(StringType), format).as("Date"))
+  }
+  def unixSecondsToDate(unixDf: DataFrame): DataFrame = {
+    val unixColumnName = unixDf.columns.head
+    val format = "yyyy-MM-dd"
+
+    unixDf
+      .withColumn("DATE", to_date(from_unixtime(col(unixColumnName)), format))
   }
 
   def YyyyMmDdToLong(df: DataFrame): DataFrame = {
@@ -41,26 +65,49 @@ class TimeTransformer {
 }
 object TimeTransformer extends App {
   val timeTransformer = new TimeTransformer
-  val timeDf = CreateDataframe.getTimeDf
 
-  val timeYyyyMmDd = timeTransformer.unixToYyyymmdd(timeDf)
+//  val timeDf = CreateDataframe.getTimeUnixDf
+//  val timeYyyyMmDd = timeTransformer.unixToYyyymmdd(timeDf)
+//  timeDf.show
+//  timeYyyyMmDd.show
+
+  /**
+    * long(1573649887000) in miliseconds to date(yyyy-MM-dd)
+    */
+//  val timeLongDf = CreateDataframe.getTimeUnixDf
+//  val timeLongToDateDf = timeTransformer.unixToDate(timeLongDf)
+//  timeLongDf.show
+//
+//  timeLongToDateDf.printSchema
+//  timeLongToDateDf.show
+  /*************************************************************/
+  /**
+    * long(1573649887) in seconds to date(yyyy-MM-dd)
+    */
+  val timeUnixSecondsLongDf = CreateDataframe.getTimeUnixSecondsDf
+  val timeUnixSecondsToDateDf = timeTransformer.unixSecondsToDate(timeUnixSecondsLongDf)
+
+  timeUnixSecondsLongDf.show
+  timeUnixSecondsToDateDf.printSchema
+  timeUnixSecondsToDateDf.show
+  /*************************************************************/
 
 //  timeTransformer.timeUnixDf.printSchema
 //  timeYyyyMmDd.printSchema
 //  timeTransformer.timeUnixDf.show
 //  timeYyyyMmDd.show
 
-  val timeIntegerFormatDf = CreateDataframe.getTimeIntegerFormatDf
-  val timeIntegerFormatDf2 = CreateDataframe.getTimeIntegerFormatDf2
-  val timeIntegerFormatted = timeTransformer.YyyyMmDdToLong(timeIntegerFormatDf)
-  val timeIntegerFormatted2 = timeTransformer.YyyyMmDdToLong(timeIntegerFormatDf2).withColumnRenamed("TimeFormatted", "TimeFormatted2")
-
-  val dfTime =
-    timeIntegerFormatted2
-      .join(timeIntegerFormatted, Seq("id"))
-      .withColumn("Minus", col("TimeFormatted2") - col("TimeFormatted"))
-
-  dfTime.show
+//  val timeIntegerFormatDf = CreateDataframe.getTimeIntegerFormatDf
+//  val timeIntegerFormatDf2 = CreateDataframe.getTimeIntegerFormatDf2
+//  val timeIntegerFormatted = timeTransformer.YyyyMmDdToLong(timeIntegerFormatDf)
+//  val timeIntegerFormatted2 = timeTransformer.YyyyMmDdToLong(timeIntegerFormatDf2).withColumnRenamed("TimeFormatted", "TimeFormatted2")
+//
+//  val dfTime =
+//    timeIntegerFormatted2
+//      .join(timeIntegerFormatted, Seq("id"))
+//      .withColumn("Minus", col("TimeFormatted2") - col("TimeFormatted"))
+//
+//  dfTime.show
 }
 
 class NumberTransformer {
