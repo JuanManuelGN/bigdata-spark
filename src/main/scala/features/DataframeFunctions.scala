@@ -29,25 +29,26 @@ case class DataframeFunctions() extends SparkConfig {
     */
   def deleteDuplicates(df: DataFrame): DataFrame = {
     val rows = df.collect().toList
-    val firstRow = rows.head
-    val rowsOutput = rows.tail.foldLeft(List(Row()))((rows, row) => {
-      val incomingId = row.getInt(0)
+    val rowsOutput = rows.foldLeft(List(Row()))((rows, row) => {
+      val incomingId = row.getAs[Integer](0)
       if (rows.head.size > 0) {
-        val duplicate = rows.filter(x => x.getInt(0) == incomingId)
+        val duplicate = rows.filter(x => x.getAs[Integer](0) == incomingId)
         if (duplicate.isEmpty) {
           rows ++ List(row)
         } else {
-          val storedColumn2 = rows(0).getString(1)
-          val incomingColumn2 = row.getString(1)
 
-          val column1 = row.getInt(0)
-          val column2 = if (incomingColumn2.isEmpty) {
+          val storedColumn2 = rows.filter(x => x.getAs[Integer](0) == incomingId).head.getAs[String](1)
+          val incomingColumn2 = row.getAs[String](1)
+
+          val column1 = row.getAs[Integer](0)
+
+          val column2 = if (incomingColumn2 == null || incomingColumn2.isEmpty) {
             storedColumn2
           } else {
             incomingColumn2
           }
-          val date = row.getInt(2)
-          List(Row(column1, column2, date))
+          val date = row.getAs[Integer](2)
+          rows.filter(x => x.getAs[Integer](0) != column1) ++ List(Row(column1, column2, date))
         }
       } else {
         List(row)

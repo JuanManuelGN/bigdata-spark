@@ -108,7 +108,8 @@ case class CreateDataframe() extends SparkConfig {
     StructType(List(StructField("column1", IntegerType),
       StructField("column2", StringType),
       StructField("date", IntegerType)))
-  private val duplicateRaw = List(Row(1, "a", 1), Row(2, "b", 1), Row(2, "6", 2), Row(2, "8", 3), Row(1, "r", 3), Row(5, "T", 3))
+  private val duplicateRaw = List(Row(6, "a", 1), Row(2, null, null), Row(2, "6", 2), Row(2, null, 3), Row(1, "r", 3), Row(5, "T", 3))
+//  private val duplicateRaw = List(Row(1, "a", 1), Row(2, "b", 1), Row(5, "T", 3))
   private val duplicateDf = spark.createDataFrame(spark.sparkContext.parallelize(duplicateRaw), duplicateSchema)
 }
 
