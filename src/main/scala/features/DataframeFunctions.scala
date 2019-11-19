@@ -1,11 +1,64 @@
 package features
 
-import org.apache.spark.sql.DataFrame
+import config.SparkConfig
+import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 
-case class DataframeFunctions() {
+case class DataframeFunctions() extends SparkConfig {
 
   def minus(df1: DataFrame, df2: DataFrame): DataFrame = df1.except(df2)
+  /**
+    * Dado un dataframe con filas con identificadores duplicados, este método agrupará todos esos
+    * registros con un mismo id en uno solo. En el caso de que el resto de campos sean distintos
+    * cogerá el último de los mismos, por ejemplo:
+    * id  name
+    * --------
+    * 1   pepe
+    * 2   juan
+    * 1   alberto
+    *
+    * El resultado sería
+    *
+    * id  name
+    * --------
+    * 1   alberto
+    * 2   juan
+    * @param df dataframe
+    * @return dataframe without duplicates rows
+    */
+  def deleteDuplicates(df: DataFrame): DataFrame = {
+    val rows = df.collect().toList
+    val firstRow = rows.head
+    val rowsOutput = rows.tail.foldLeft(List(Row()))((rows, row) => {
+      val incomingId = row.getInt(0)
+      if (rows.head.size > 0) {
+        val duplicate = rows.filter(x => x.getInt(0) == incomingId)
+        if (duplicate.isEmpty) {
+          rows ++ List(row)
+        } else {
+          val storedColumn2 = rows(0).getString(1)
+          val incomingColumn2 = row.getString(1)
+
+          val column1 = row.getInt(0)
+          val column2 = if (incomingColumn2.isEmpty) {
+            storedColumn2
+          } else {
+            incomingColumn2
+          }
+          val date = row.getInt(2)
+          List(Row(column1, column2, date))
+        }
+      } else {
+        List(row)
+      }
+    }
+    )
+    val schema = StructType(List(StructField("column1", IntegerType),
+      StructField("column2", StringType),
+      StructField("date", IntegerType)))
+    spark.createDataFrame(spark.sparkContext.parallelize(rowsOutput), schema)
+  }
 }
 
 object DataframeFunctions extends App {
@@ -26,4 +79,13 @@ object DataframeFunctions extends App {
   val minus = functions.minus(df1, df2)
 
   minus.show
+}
+object CleanDuplicate extends App {
+  val duplicateDf = CreateDataframe.getDuplicateRowDf
+
+  duplicateDf.show
+
+  val cleaned = DataframeFunctions().deleteDuplicates(duplicateDf)
+
+  cleaned.show
 }

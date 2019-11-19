@@ -103,6 +103,13 @@ case class CreateDataframe() extends SparkConfig {
   private val minus2Raw = List(Row(1, "a"))
   private val minus1Df = spark.createDataFrame(spark.sparkContext.parallelize(minus1Raw), minusSchema)
   private val minus2Df = spark.createDataFrame(spark.sparkContext.parallelize(minus2Raw), minusSchema)
+
+  private val duplicateSchema =
+    StructType(List(StructField("column1", IntegerType),
+      StructField("column2", StringType),
+      StructField("date", IntegerType)))
+  private val duplicateRaw = List(Row(1, "a", 1), Row(2, "b", 1), Row(2, "6", 2), Row(2, "8", 3), Row(1, "r", 3), Row(5, "T", 3))
+  private val duplicateDf = spark.createDataFrame(spark.sparkContext.parallelize(duplicateRaw), duplicateSchema)
 }
 
 object CreateDataframe extends App {
@@ -122,4 +129,5 @@ object CreateDataframe extends App {
   def getEmptyDf: DataFrame = CreateDataframe().emptyDf
   def getMinus1Df: DataFrame = CreateDataframe().minus1Df
   def getMinus2Df: DataFrame = CreateDataframe().minus2Df
+  def getDuplicateRowDf: DataFrame = CreateDataframe().duplicateDf
 }
