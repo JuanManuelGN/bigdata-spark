@@ -60,6 +60,8 @@ case class DataframeFunctions() extends SparkConfig {
       StructField("date", IntegerType)))
     spark.createDataFrame(spark.sparkContext.parallelize(rowsOutput), schema)
   }
+
+  def contains(df: DataFrame, x: Int): DataFrame = df.select(col(df.columns.head).contains(x))
 }
 
 object DataframeFunctions extends App {
@@ -89,4 +91,10 @@ object CleanDuplicate extends App {
   val cleaned = DataframeFunctions().deleteDuplicates(duplicateDf)
 
   cleaned.show
+}
+object Contains extends App {
+  val df = CreateDataframe.getIntDf
+  val x = 1
+
+  DataframeFunctions().contains(df, x).show
 }

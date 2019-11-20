@@ -90,7 +90,7 @@ case class CreateDataframe() extends SparkConfig {
   private val longDf = spark.createDataFrame(spark.sparkContext.parallelize(longRaw), longSchema)
 
   private val intSchema = StructType(List(StructField("id", IntegerType)))
-  private val intRaw = List(Row(1), Row(2))
+  private val intRaw = List(Row(1), Row(2), Row(12))
   private val intDf = spark.createDataFrame(spark.sparkContext.parallelize(intRaw), intSchema)
 
   private val emptySchema = StructType(List(StructField("id", IntegerType)))
