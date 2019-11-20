@@ -83,6 +83,21 @@ object DataframeFunctions extends App {
 
   minus.show
 }
+object Except extends App {
+  val df = CreateDataframe.getIdDf
+  val emptyDf = df.filter(col("id") === 0)
+  val exceptDf = DataframeFunctions().minus(df, emptyDf)
+
+  df.show
+  emptyDf.show
+  exceptDf.show
+
+  df.union(emptyDf).show
+
+  val listin: List[Int] = List()
+
+  df.filter(col("id").isin(listin: _*)).show
+}
 object CleanDuplicate extends App {
   val duplicateDf = CreateDataframe.getDuplicateRowDf
 

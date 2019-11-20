@@ -4,6 +4,7 @@ import config.SparkConfig
 import features.AddColumnToDF.spark
 import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.functions._
 
 /**
   * En esta clase está centralizada la creación de los dataframes que el resto de componentes van
@@ -97,6 +98,9 @@ case class CreateDataframe() extends SparkConfig {
   private val emptyRaw = List(Row())
   private val emptyDf = spark.createDataFrame(spark.sparkContext.parallelize(emptyRaw), emptySchema)
 
+  private val idRaw = List(Row(1))
+  private val idDf = spark.createDataFrame(spark.sparkContext.parallelize(idRaw), emptySchema)
+
   private val minusSchema =
     StructType(List(StructField("column1", IntegerType), StructField("column2", StringType)))
   private val minus1Raw = List(Row(1, "a"), Row(2, "b"))
@@ -131,4 +135,28 @@ object CreateDataframe extends App {
   def getMinus1Df: DataFrame = CreateDataframe().minus1Df
   def getMinus2Df: DataFrame = CreateDataframe().minus2Df
   def getDuplicateRowDf: DataFrame = CreateDataframe().duplicateDf
+  def getIdDf: DataFrame = CreateDataframe().idDf
+
+  val numberDf = getNumberDF._1
+
+  numberDf.printSchema
+
+//  val numberModifiedDf = numberDf.withColumn("c2", when(col("c1") === 1560, lit(2000)))
+//
+//  val schema = StructType(List(StructField("c1", IntegerType), StructField("c2", IntegerType)))
+//  val rdd = numberModifiedDf.rdd
+//  val newNumberDf = spark.createDataFrame(spark.sparkContext.parallelize(rdd.collect), schema)
+//  newNumberDf.printSchema
+
+  val numberNewSchema = alterSchema(numberDf)
+  numberNewSchema.printSchema
+
+  def alterSchema(df: DataFrame): DataFrame ={
+    val schema = df.schema
+    val newSchema =
+      StructType(schema.map(field => StructField(field.name, field.dataType, true, field.metadata)))
+    df.sqlContext.createDataFrame( df.rdd, newSchema )
+  }
+
+
 }
