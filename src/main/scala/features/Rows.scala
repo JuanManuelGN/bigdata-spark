@@ -1,7 +1,24 @@
 package features
 
-import org.apache.spark.sql.SparkSession
+import features.Rows.spark
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions._
+
+
+case class Nulls() {
+  def cast(dfWithNulls: DataFrame): Unit = {
+    dfWithNulls.show
+    println(
+      dfWithNulls.select("field2").head.getString(0) == null)
+  }
+}
+object Nulls extends App {
+  import spark.implicits._
+
+  val df = CreateDataframe.getIncomingDf
+
+  Nulls().cast(df)
+}
 
 object Rows extends App {
 
