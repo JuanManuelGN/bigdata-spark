@@ -115,6 +115,12 @@ case class CreateDataframe() extends SparkConfig {
   private val duplicateRaw = List(Row(6, "a", 1), Row(2, null, null), Row(2, "6", 2), Row(2, null, 3), Row(1, "r", 3), Row(5, "T", 3))
 //  private val duplicateRaw = List(Row(1, "a", 1), Row(2, "b", 1), Row(5, "T", 3))
   private val duplicateDf = spark.createDataFrame(spark.sparkContext.parallelize(duplicateRaw), duplicateSchema)
+
+  private def nullSchema = StructType(List(StructField("col1", IntegerType),
+                                           StructField("col2", StringType)))
+
+  private val nullRaw = List(Row(1, "a"), Row(null, "b"), Row(3, null))
+  private val nullValuesDf = spark.createDataFrame(spark.sparkContext.parallelize(nullRaw), nullSchema)
 }
 
 object CreateDataframe extends App {
@@ -136,6 +142,7 @@ object CreateDataframe extends App {
   def getMinus2Df: DataFrame = CreateDataframe().minus2Df
   def getDuplicateRowDf: DataFrame = CreateDataframe().duplicateDf
   def getIdDf: DataFrame = CreateDataframe().idDf
+  def getDfWithNullValues: DataFrame = CreateDataframe().nullValuesDf
 
   val numberDf = getNumberDF._1
 

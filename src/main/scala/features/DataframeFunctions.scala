@@ -62,6 +62,8 @@ case class DataframeFunctions() extends SparkConfig {
   }
 
   def contains(df: DataFrame, x: Int): DataFrame = df.select(col(df.columns.head).contains(x))
+
+  def fillNull(df: DataFrame): DataFrame = df.na.fill("XX").na.fill(0)
 }
 
 object DataframeFunctions extends App {
@@ -112,4 +114,9 @@ object Contains extends App {
   val x = 1
 
   DataframeFunctions().contains(df, x).show
+}
+object FillNull extends App {
+  val df: DataFrame = CreateDataframe.getDfWithNullValues
+  val x:DataFrame = DataframeFunctions().fillNull(df)
+  x.show
 }
