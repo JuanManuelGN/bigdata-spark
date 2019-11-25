@@ -63,6 +63,11 @@ case class DataframeFunctions() extends SparkConfig {
 
   def contains(df: DataFrame, x: Int): DataFrame = df.select(col(df.columns.head).contains(x))
 
+  /**
+    * Rellena con "XX los campos nulos de tipo string y con 0 los campos nulos de tipo entero
+    * @param df dataframe con valores nulos
+    * @return dataframe sin valores nulos
+    */
   def fillNull(df: DataFrame): DataFrame = df.na.fill("XX").na.fill(0)
 }
 
