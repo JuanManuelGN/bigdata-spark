@@ -121,6 +121,10 @@ case class CreateDataframe() extends SparkConfig {
 
   private val nullRaw = List(Row(1, "a"), Row(null, "b"), Row(3, null))
   private val nullValuesDf = spark.createDataFrame(spark.sparkContext.parallelize(nullRaw), nullSchema)
+
+  private def decimalSchema = StructType(List(StructField("col1", StringType)))
+  private val decimalRaw = List(Row("1500.000"))
+  private val decimalDf = spark.createDataFrame(spark.sparkContext.parallelize(decimalRaw), decimalSchema)
 }
 
 object CreateDataframe extends App {
@@ -143,6 +147,7 @@ object CreateDataframe extends App {
   def getDuplicateRowDf: DataFrame = CreateDataframe().duplicateDf
   def getIdDf: DataFrame = CreateDataframe().idDf
   def getDfWithNullValues: DataFrame = CreateDataframe().nullValuesDf
+  def getDecimalDf: DataFrame = CreateDataframe().decimalDf
 
   val numberDf = getNumberDF._1
 

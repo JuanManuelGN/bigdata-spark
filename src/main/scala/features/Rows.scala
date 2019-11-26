@@ -3,6 +3,7 @@ package features
 import features.Rows.spark
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.DecimalType
 
 
 case class Nulls() {
@@ -18,6 +19,19 @@ object Nulls extends App {
   val df = CreateDataframe.getIncomingDf
 
   Nulls().cast(df)
+}
+
+case class Decimal() {
+  def cast: DataFrame => DataFrame = df =>
+    df.select(col("col1").cast(DecimalType(10, 3)).as("casted"))
+      .withColumn("col2", col("casted"))
+}
+object Decimal extends App {
+
+  val decimalDf = CreateDataframe.getDecimalDf
+  val df = Decimal().cast(decimalDf)
+  df.printSchema
+  df.show
 }
 
 object Rows extends App {
