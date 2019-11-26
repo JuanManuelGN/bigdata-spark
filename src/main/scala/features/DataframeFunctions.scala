@@ -68,7 +68,7 @@ case class DataframeFunctions() extends SparkConfig {
     * @param df dataframe con valores nulos
     * @return dataframe sin valores nulos
     */
-  def fillNull(df: DataFrame): DataFrame = df.na.fill("XX").na.fill(0)
+  def fillNull : DataFrame => DataFrame = df => df.na.fill("XX").na.fill(0)
 }
 
 object DataframeFunctions extends App {
