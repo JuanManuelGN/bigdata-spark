@@ -1,7 +1,6 @@
 package features
 
 import config.SparkConfig
-import features.AddColumnToDF.spark
 import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions._
@@ -125,6 +124,10 @@ case class CreateDataframe() extends SparkConfig {
   private def decimalSchema = StructType(List(StructField("col1", StringType)))
   private val decimalRaw = List(Row("1500.000"))
   private val decimalDf = spark.createDataFrame(spark.sparkContext.parallelize(decimalRaw), decimalSchema)
+
+  private def filterNotEqualSchema = StructType(List(StructField("col1", IntegerType)))
+  private val filterNotEqualRaw = List(Row(1), Row(3), Row(2), Row(4))
+  private val filterNotEqualDf = spark.createDataFrame(spark.sparkContext.parallelize(filterNotEqualRaw), filterNotEqualSchema)
 }
 
 object CreateDataframe extends App {
@@ -148,6 +151,7 @@ object CreateDataframe extends App {
   def getIdDf: DataFrame = CreateDataframe().idDf
   def getDfWithNullValues: DataFrame = CreateDataframe().nullValuesDf
   def getDecimalDf: DataFrame = CreateDataframe().decimalDf
+  def getFilterNotEqualDf: DataFrame = CreateDataframe().filterNotEqualDf
 
   val numberDf = getNumberDF._1
 

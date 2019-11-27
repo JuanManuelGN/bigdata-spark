@@ -69,6 +69,8 @@ case class DataframeFunctions() extends SparkConfig {
     * @return dataframe sin valores nulos
     */
   def fillNull : DataFrame => DataFrame = df => df.na.fill("XX").na.fill(0)
+
+  def filterNotEqual(df: DataFrame): DataFrame = df.filter(col("col1") =!= 2)
 }
 
 object DataframeFunctions extends App {
@@ -124,4 +126,9 @@ object FillNull extends App {
   val df: DataFrame = CreateDataframe.getDfWithNullValues
   val x:DataFrame = DataframeFunctions().fillNull(df)
   x.show
+}
+object FilterNotEqual extends App {
+  val df: DataFrame = CreateDataframe.getFilterNotEqualDf
+  val response = DataframeFunctions().filterNotEqual(df)
+  response.show
 }
