@@ -1,6 +1,7 @@
 package features
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.functions.col
 
 object Join extends App {
 
@@ -106,4 +107,18 @@ object JoinWithEmptyDf extends App {
 
   dfJoined.show
 
+}
+
+case class JoinAndSum() {
+  def joinAndSum: DataFrame => DataFrame => DataFrame = df1 => df2 => {
+    df1.join(df2, Seq(df1.columns.head))
+      .withColumn("sum", List(col(df1.columns(1)), col(df2.columns(1))).reduce(_ + _))
+  }
+}
+object JoinAndSum extends App {
+  val df1 = CreateDataframe.getJoinAndSum1
+  val df2 = CreateDataframe.getJoinAndSum2
+  val df2Renamed = df2.withColumnRenamed(df2.columns(1), df2.columns(1) + "_")
+  val response = JoinAndSum().joinAndSum(df1)(df2Renamed)
+  response.show
 }

@@ -128,6 +128,13 @@ case class CreateDataframe() extends SparkConfig {
   private def filterNotEqualSchema = StructType(List(StructField("col1", IntegerType)))
   private val filterNotEqualRaw = List(Row(1), Row(3), Row(2), Row(4))
   private val filterNotEqualDf = spark.createDataFrame(spark.sparkContext.parallelize(filterNotEqualRaw), filterNotEqualSchema)
+
+  private def joinAndSumSchema = StructType(List(StructField("col1", IntegerType), StructField("col2", IntegerType)))
+  private val joinAndSumRaw1 = List(Row(1,1), Row(3,2), Row(2,5), Row(4,0))
+  private val joinAndSum1Df = spark.createDataFrame(spark.sparkContext.parallelize(joinAndSumRaw1), joinAndSumSchema)
+
+  private val joinAndSumRaw2 = List(Row(1,6), Row(3,8), Row(2,7), Row(4,2))
+  private val joinAndSum2Df = spark.createDataFrame(spark.sparkContext.parallelize(joinAndSumRaw2), joinAndSumSchema)
 }
 
 object CreateDataframe extends App {
@@ -152,6 +159,8 @@ object CreateDataframe extends App {
   def getDfWithNullValues: DataFrame = CreateDataframe().nullValuesDf
   def getDecimalDf: DataFrame = CreateDataframe().decimalDf
   def getFilterNotEqualDf: DataFrame = CreateDataframe().filterNotEqualDf
+  def getJoinAndSum1: DataFrame = CreateDataframe().joinAndSum1Df
+  def getJoinAndSum2: DataFrame = CreateDataframe().joinAndSum2Df
 
   val numberDf = getNumberDF._1
 
