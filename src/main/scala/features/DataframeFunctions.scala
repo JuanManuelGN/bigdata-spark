@@ -1,7 +1,7 @@
 package features
 
 import config.SparkConfig
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 
@@ -70,7 +70,27 @@ case class DataframeFunctions() extends SparkConfig {
     */
   def fillNull : DataFrame => DataFrame = df => df.na.fill("XX").na.fill(0)
 
+  def fillNullSeveralCases: (DataFrame, Map[String, Column]) => DataFrame =
+    (df, default) => {
+      val p = df.columns.map(c =>
+        if (default.contains(c)) {
+          when(col(c).isNull, default(c)).otherwise(df(c)).as(c)
+        } else {
+          df(c).as(c)
+        })
+      df.select(p: _*)
+    }
+
+  /**
+    * La siguiente función .na.fill no se puede usar con el tipo Column
+    * @return
+    */
+//  def fillNullWithDefaultValues : (DataFrame, Map[String, Column]) => DataFrame = (df, default) =>
+//    df.na.fill(default)
+
   def filterNotEqual(df: DataFrame): DataFrame = df.filter(col("col1") =!= 2)
+
+  def isValid(col: Column): Column = col.isNotNull && !col.equals("")
 }
 
 object DataframeFunctions extends App {
@@ -124,11 +144,37 @@ object Contains extends App {
 }
 object FillNull extends App {
   val df: DataFrame = CreateDataframe.getDfWithNullValues
-  val x:DataFrame = DataframeFunctions().fillNull(df)
+  val x: DataFrame = DataframeFunctions().fillNull(df)
   x.show
+}
+object FillNullSeveralCases extends App {
+  val df: DataFrame = CreateDataframe.getDfWithNullValues
+
+  /**
+    * Dos formas de montar el mapa con las columnas y los valores por defecto
+    */
+  // forma 1
+  val columns = df.columns
+  val default = columns.map{
+    case "col1" => "col1" -> lit(5)
+    case x => x -> lit("patata")
+  }.toMap
+
+  // forma 2
+//  val default: Map[String, Column] = Map("col1" -> lit(5), "col2" -> lit("patata"))
+  val response: DataFrame = DataframeFunctions().fillNullSeveralCases(df, default)
+  df.show
+  response.show
 }
 object FilterNotEqual extends App {
   val df: DataFrame = CreateDataframe.getFilterNotEqualDf
   val response = DataframeFunctions().filterNotEqual(df)
+  df.show
   response.show
+}
+object IsValid extends App {
+  val df = CreateDataframe.getIntDf
+  val response = DataframeFunctions().isValid(df.col("id"))
+
+  df.withColumn("isValid", response).show
 }
