@@ -84,12 +84,12 @@ object TimeTransformer extends App {
   /**
     * long(1573649887) in seconds to date(yyyy-MM-dd)
     */
-  val timeUnixSecondsLongDf = CreateDataframe.getTimeUnixSecondsDf
-  val timeUnixSecondsToDateDf = timeTransformer.unixSecondsToDate(timeUnixSecondsLongDf)
-
-  timeUnixSecondsLongDf.show
-  timeUnixSecondsToDateDf.printSchema
-  timeUnixSecondsToDateDf.show
+//  val timeUnixSecondsLongDf = CreateDataframe.getTimeUnixSecondsDf
+//  val timeUnixSecondsToDateDf = timeTransformer.unixSecondsToDate(timeUnixSecondsLongDf)
+//
+//  timeUnixSecondsLongDf.show
+//  timeUnixSecondsToDateDf.printSchema
+//  timeUnixSecondsToDateDf.show
   /*************************************************************/
 
 //  timeTransformer.timeUnixDf.printSchema
@@ -97,10 +97,12 @@ object TimeTransformer extends App {
 //  timeTransformer.timeUnixDf.show
 //  timeYyyyMmDd.show
 
-//  val timeIntegerFormatDf = CreateDataframe.getTimeIntegerFormatDf
-//  val timeIntegerFormatDf2 = CreateDataframe.getTimeIntegerFormatDf2
-//  val timeIntegerFormatted = timeTransformer.YyyyMmDdToLong(timeIntegerFormatDf)
-//  val timeIntegerFormatted2 = timeTransformer.YyyyMmDdToLong(timeIntegerFormatDf2).withColumnRenamed("TimeFormatted", "TimeFormatted2")
+  val timeIntegerFormatDf = CreateDataframe.getTimeIntegerFormatDf
+  val timeIntegerFormatDf2 = CreateDataframe.getTimeIntegerFormatDf2
+  val timeIntegerFormatted = timeTransformer.YyyyMmDdToLong(timeIntegerFormatDf)
+  val timeIntegerFormatted2 = timeTransformer.YyyyMmDdToLong(timeIntegerFormatDf2).withColumnRenamed("TimeFormatted", "TimeFormatted2")
+  timeIntegerFormatted.show
+  timeIntegerFormatted2.show
 //
 //  val dfTime =
 //    timeIntegerFormatted2
