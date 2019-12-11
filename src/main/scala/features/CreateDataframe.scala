@@ -90,7 +90,7 @@ case class CreateDataframe() extends SparkConfig {
   private val longDf = spark.createDataFrame(spark.sparkContext.parallelize(longRaw), longSchema)
 
   private val intSchema = StructType(List(StructField("id", IntegerType)))
-  private val intRaw = List(Row(1), Row(2), Row(12))
+  private val intRaw = List(Row(1), Row(null), Row(12))
   private val intDf = spark.createDataFrame(spark.sparkContext.parallelize(intRaw), intSchema)
 
   private val emptySchema = StructType(List(StructField("id", IntegerType)))
@@ -135,6 +135,10 @@ case class CreateDataframe() extends SparkConfig {
 
   private val joinAndSumRaw2 = List(Row(1,6), Row(3,8), Row(2,7), Row(4,2))
   private val joinAndSum2Df = spark.createDataFrame(spark.sparkContext.parallelize(joinAndSumRaw2), joinAndSumSchema)
+
+  private def decimalTypeSchema = StructType(List(StructField("col1", DecimalType(10, 3))))
+  private val decimalTypeRaw = List(Row(BigDecimal(0)))
+  private val decimalTypeDf = spark.createDataFrame(spark.sparkContext.parallelize(decimalTypeRaw), decimalTypeSchema)
 }
 
 object CreateDataframe extends App {
@@ -161,6 +165,7 @@ object CreateDataframe extends App {
   def getFilterNotEqualDf: DataFrame = CreateDataframe().filterNotEqualDf
   def getJoinAndSum1: DataFrame = CreateDataframe().joinAndSum1Df
   def getJoinAndSum2: DataFrame = CreateDataframe().joinAndSum2Df
+  def getDecimalTypeDf = CreateDataframe().decimalTypeDf
 
   val numberDf = getNumberDF._1
 
@@ -184,4 +189,7 @@ object CreateDataframe extends App {
   }
 
 
+}
+object DecimalTypeRun extends App {
+  CreateDataframe.getDecimalTypeDf.show
 }
