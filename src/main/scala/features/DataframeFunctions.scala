@@ -85,8 +85,17 @@ case class DataframeFunctions() extends SparkConfig {
     * La siguiente función .na.fill no se puede usar con el tipo Column
     * @return
     */
-//  def fillNullWithDefaultValues : (DataFrame, Map[String, Column]) => DataFrame = (df, default) =>
-//    df.na.fill(default)
+  def fillNullWithDefaultValues : (DataFrame, Map[String, Any]) => DataFrame = (df, default) =>
+    df.na.fill(default) // no funciona con nulos
+
+  def fillNull1: (DataFrame, Map[String, Column]) => DataFrame =
+    (df, defaults) => {
+      val projection = df.columns.map( column =>
+        defaults.get(column)
+          .map(defaultCol => coalesce(col(column), defaultCol).as(column)).getOrElse(col(column).as(column))
+      )
+      df.select(projection: _*)
+    }
 
   def filterNotEqual(df: DataFrame): DataFrame = df.filter(col("col1") =!= 2)
 
@@ -147,6 +156,13 @@ object FillNull extends App {
   val x: DataFrame = DataframeFunctions().fillNull(df)
   x.show
 }
+object FillNullWithDefaultValues extends App {
+  val df: DataFrame = CreateDataframe.getDfWithNullValues
+  val default: Map[String, Any] = Map("col1" -> 20, "col2" -> "patata")
+  val x: DataFrame = DataframeFunctions().fillNullWithDefaultValues(df, default)
+  df.show
+  x.show
+}
 object FillNullSeveralCases extends App {
   val df: DataFrame = CreateDataframe.getDfWithNullValues
 
@@ -165,6 +181,13 @@ object FillNullSeveralCases extends App {
   val response: DataFrame = DataframeFunctions().fillNullSeveralCases(df, default)
   df.show
   response.show
+}
+object FillNull1 extends App {
+  val df: DataFrame = CreateDataframe.getDfWithNullValues
+  val default: Map[String, Column] = Map("col1" -> lit(20)/*, "col2" -> lit("patata")*/)
+  val x: DataFrame = DataframeFunctions().fillNull1(df, default)
+  df.show
+  x.show
 }
 object FilterNotEqual extends App {
   val df: DataFrame = CreateDataframe.getFilterNotEqualDf

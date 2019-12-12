@@ -115,10 +115,10 @@ case class CreateDataframe() extends SparkConfig {
 //  private val duplicateRaw = List(Row(1, "a", 1), Row(2, "b", 1), Row(5, "T", 3))
   private val duplicateDf = spark.createDataFrame(spark.sparkContext.parallelize(duplicateRaw), duplicateSchema)
 
-  private def nullSchema = StructType(List(StructField("col1", IntegerType),
+  private def nullSchema = StructType(List(StructField("col1", DecimalType(10, 3)),
                                            StructField("col2", StringType)))
 
-  private val nullRaw = List(Row(1, "a"), Row(null, "b"), Row(3, null))
+  private val nullRaw = List(Row(BigDecimal(1), "a"), Row(null, "b"), Row(BigDecimal(3), null))
   private val nullValuesDf = spark.createDataFrame(spark.sparkContext.parallelize(nullRaw), nullSchema)
 
   private def decimalSchema = StructType(List(StructField("col1", StringType)))
