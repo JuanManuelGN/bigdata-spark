@@ -170,14 +170,19 @@ object FillNullSeveralCases extends App {
     * Dos formas de montar el mapa con las columnas y los valores por defecto
     */
   // forma 1
-  val columns = df.columns
-  val default = columns.map{
+  val columns = df.columns.toList ++ List("pepe")
+  columns.map(println(_))
+
+  val default = columns.map {
+    case x if x.equals("col3") => "col3" -> lit(6)
     case "col1" => "col1" -> lit(5)
     case x => x -> lit("patata")
   }.toMap
+  default.map(println(_))
 
   // forma 2
 //  val default: Map[String, Column] = Map("col1" -> lit(5), "col2" -> lit("patata"))
+
   val response: DataFrame = DataframeFunctions().fillNullSeveralCases(df, default)
   df.show
   response.show
