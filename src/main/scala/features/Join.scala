@@ -103,6 +103,8 @@ object JoinWithEmptyDf extends App {
   val df = CreateDataframe.getIntDf
   val emptyDf = CreateDataframe.getEmptyDf
 
+  emptyDf.show
+
   val dfJoined = JoinWithEmptyDf().doJoin(df, emptyDf)
 
   dfJoined.show
