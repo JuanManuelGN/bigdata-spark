@@ -100,6 +100,36 @@ case class DataframeFunctions() extends SparkConfig {
   def filterNotEqual(df: DataFrame): DataFrame = df.filter(col("col1") =!= 2)
 
   def isValid(col: Column): Column = col.isNotNull && !col.equals("")
+
+  /**
+    * Cuenta la cantidad de unos que hay en las columnas de un dataframe, como resultado da otra
+    * dataframe con la misma cantidad de columnas con una única fila que contiene el número de unos
+    * de cada columna
+    *
+    * @return
+    *
+    * +----+----+----+
+    * |col1|col2|col3|
+    * +----+----+----+
+    * |   1|   1|   3|
+    * |   3|   2|   1|
+    * |   2|   5|   1|
+    * |   4|   1|   6|
+    * +----+----+----+
+    *         da como resultado:
+    * +----+----+----+
+    * |col1|col2|col3|
+    * +----+----+----+git
+    * |   1|   2|   2|
+    * +----+----+----+
+    */
+  def count: DataFrame => DataFrame = df => {
+
+    val columnList = df.columns
+    val proyection = columnList.map(c => sum(when(col(c) === 1, 1)).as(c))
+
+    df.select(proyection: _*)
+  }
 }
 
 object DataframeFunctions extends App {
@@ -188,11 +218,15 @@ object FillNullSeveralCases extends App {
   response.show
 }
 object FillNull1 extends App {
-  val df: DataFrame = CreateDataframe.getDfWithNullValues
+  val df: DataFrame =
+    CreateDataframe.getDfWithNullValues
+      .withColumn("a", lit(5))
+      .withColumn("b", col("a") * 10)
   val default: Map[String, Column] = Map("col1" -> lit(20)/*, "col2" -> lit("patata")*/)
   val x: DataFrame = DataframeFunctions().fillNull1(df, default)
   df.show
   x.show
+  df.explain(true)
 }
 object FilterNotEqual extends App {
   val df: DataFrame = CreateDataframe.getFilterNotEqualDf
@@ -205,4 +239,12 @@ object IsValid extends App {
   val response = DataframeFunctions().isValid(df.col("id"))
 
   df.withColumn("isValid", response).show
+}
+
+object Count extends App {
+  val df = CreateDataframe.getCountDf
+  val response = DataframeFunctions().count(df)
+
+  df.show
+  response.show
 }
