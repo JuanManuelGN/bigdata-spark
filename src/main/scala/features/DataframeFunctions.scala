@@ -119,7 +119,7 @@ case class DataframeFunctions() extends SparkConfig {
     *         da como resultado:
     * +----+----+----+
     * |col1|col2|col3|
-    * +----+----+----+git
+    * +----+----+----+
     * |   1|   2|   2|
     * +----+----+----+
     */
