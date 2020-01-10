@@ -182,7 +182,7 @@ object Except extends DfRunner {
 
   df.filter(col("id").isin(listin: _*)).show
 }
-object CleanDuplicate extends DfRunner {
+object DeleteDuplicate extends DfRunner {
   val duplicateDf = CreateDataframe.getDuplicateRowDf
 
   val cleaned = deleteDuplicates(duplicateDf)
