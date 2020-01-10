@@ -5,8 +5,14 @@ import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 
-case class DataframeFunctions() extends SparkConfig {
+trait DataframeFunctions extends SparkConfig {
 
+  /**
+    * Elimina las filas del primer dataframe que aparecen en el segundo dataframe
+    * @param df1
+    * @param df2
+    * @return
+    */
   def minus(df1: DataFrame, df2: DataFrame): DataFrame = df1.except(df2)
   /**
     * Dado un dataframe con filas con identificadores duplicados, este método agrupará todos esos
@@ -61,14 +67,22 @@ case class DataframeFunctions() extends SparkConfig {
     spark.createDataFrame(spark.sparkContext.parallelize(rowsOutput), schema)
   }
 
+  /**
+    * Devuelve si un dato se encuentra en una columna de un dataframe
+    * @param df DataFrame
+    * @param x dato a buscar
+    * @return
+    */
   def contains(df: DataFrame, x: Int): DataFrame = df.select(col(df.columns.head).contains(x))
 
   /**
-    * Rellena con "XX los campos nulos de tipo string y con 0 los campos nulos de tipo entero
+    * Rellena con "s los campos nulos de tipo string y con i los campos nulos de tipo entero
     * @param df dataframe con valores nulos
+    * @param s cadena con el valor a sustituir en las columnas de tipo string
+    * @param i número entero a sustituir en las columnas de tipo Int
     * @return dataframe sin valores nulos
     */
-  def fillNull : DataFrame => DataFrame = df => df.na.fill("XX").na.fill(0)
+  def fillNull : (DataFrame, String, Int) => DataFrame = (df, s, i) => df.na.fill(s).na.fill(i)
 
   def fillNullSeveralCases: (DataFrame, Map[String, Column]) => DataFrame =
     (df, default) => {
@@ -126,13 +140,17 @@ case class DataframeFunctions() extends SparkConfig {
   def count: DataFrame => DataFrame = df => {
 
     val columnList = df.columns
-    val proyection = columnList.map(c => sum(when(col(c) === 1, 1)).as(c))
+    val projection = columnList.map(c => sum(when(col(c) === 1, 1)).as(c))
 
-    df.select(proyection: _*)
+    df.select(projection: _*)
   }
+
+  def showDfs(dfs: List[DataFrame]): Unit = dfs.foreach(df => df.show)
 }
 
-object DataframeFunctions extends App {
+trait DfRunner extends App with DataframeFunctions
+
+object Minus extends DfRunner {
   val df1 = CreateDataframe.getMinus1Df
   val df2 = CreateDataframe.getMinus2Df
 
@@ -145,16 +163,14 @@ object DataframeFunctions extends App {
   val df2Crossdf1 =
     df2.filter(col("column1").isin(sharedIds: _*))
 
-  val functions = new DataframeFunctions()
+  val response = minus(df1, df2)
 
-  val minus = functions.minus(df1, df2)
-
-  minus.show
+  showDfs(List(df1, df2, df1Crossdf2, df2Crossdf1, response))
 }
-object Except extends App {
+object Except extends DfRunner {
   val df = CreateDataframe.getIdDf
   val emptyDf = df.filter(col("id") === 0)
-  val exceptDf = DataframeFunctions().minus(df, emptyDf)
+  val exceptDf = minus(df, emptyDf)
 
   df.show
   emptyDf.show
@@ -166,34 +182,39 @@ object Except extends App {
 
   df.filter(col("id").isin(listin: _*)).show
 }
-object CleanDuplicate extends App {
+object CleanDuplicate extends DfRunner {
   val duplicateDf = CreateDataframe.getDuplicateRowDf
 
-  duplicateDf.show
+  val cleaned = deleteDuplicates(duplicateDf)
 
-  val cleaned = DataframeFunctions().deleteDuplicates(duplicateDf)
-
-  cleaned.show
+  showDfs(List(duplicateDf, cleaned))
 }
-object Contains extends App {
+object Contains extends DfRunner {
   val df = CreateDataframe.getIntDf
   val x = 1
 
-  DataframeFunctions().contains(df, x).show
+  val response = contains(df, x)
+
+  showDfs(List(df, response))
 }
-object FillNull extends App {
+object FillNull extends DfRunner {
   val df: DataFrame = CreateDataframe.getDfWithNullValues
-  val x: DataFrame = DataframeFunctions().fillNull(df)
-  x.show
+  val s: String = "XX"
+  val i: Int = 0
+
+  val response: DataFrame = fillNull(df, s, i)
+
+  showDfs(List(df, response))
 }
-object FillNullWithDefaultValues extends App {
+object FillNullWithDefaultValues extends DfRunner {
   val df: DataFrame = CreateDataframe.getDfWithNullValues
   val default: Map[String, Any] = Map("col1" -> 20, "col2" -> "patata")
-  val x: DataFrame = DataframeFunctions().fillNullWithDefaultValues(df, default)
-  df.show
-  x.show
+
+  val response: DataFrame = fillNullWithDefaultValues(df, default)
+
+  showDfs(List(df, response))
 }
-object FillNullSeveralCases extends App {
+object FillNullSeveralCases extends DfRunner {
   val df: DataFrame = CreateDataframe.getDfWithNullValues
 
   /**
@@ -213,38 +234,40 @@ object FillNullSeveralCases extends App {
   // forma 2
 //  val default: Map[String, Column] = Map("col1" -> lit(5), "col2" -> lit("patata"))
 
-  val response: DataFrame = DataframeFunctions().fillNullSeveralCases(df, default)
-  df.show
-  response.show
+  val response: DataFrame = fillNullSeveralCases(df, default)
+
+  showDfs(List(df, response))
 }
-object FillNull1 extends App {
+object FillNull1 extends DfRunner {
   val df: DataFrame =
     CreateDataframe.getDfWithNullValues
       .withColumn("a", lit(5))
       .withColumn("b", col("a") * 10)
   val default: Map[String, Column] = Map("col1" -> lit(20)/*, "col2" -> lit("patata")*/)
-  val x: DataFrame = DataframeFunctions().fillNull1(df, default)
-  df.show
-  x.show
+
+  val response: DataFrame = fillNull1(df, default)
+
+  showDfs(List(df, response))
   df.explain(true)
 }
-object FilterNotEqual extends App {
+object FilterNotEqual extends DfRunner {
   val df: DataFrame = CreateDataframe.getFilterNotEqualDf
-  val response = DataframeFunctions().filterNotEqual(df)
-  df.show
-  response.show
+  val response = filterNotEqual(df)
+
+  showDfs(List(df, response))
 }
-object IsValid extends App {
+object IsValid extends DfRunner {
   val df = CreateDataframe.getIntDf
-  val response = DataframeFunctions().isValid(df.col("id"))
+  val response = isValid(df.col("id"))
 
-  df.withColumn("isValid", response).show
+  val result = df.withColumn("isValid", response)
+
+  showDfs(List(df, result))
 }
 
-object Count extends App {
+object Count extends DfRunner {
   val df = CreateDataframe.getCountDf
-  val response = DataframeFunctions().count(df)
+  val response = count(df)
 
-  df.show
-  response.show
+  showDfs(List(df, response))
 }
