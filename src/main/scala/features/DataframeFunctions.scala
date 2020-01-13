@@ -1,11 +1,11 @@
 package features
 
 import config.SparkConfig
-import org.apache.spark.sql.{Column, DataFrame, Row}
+import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 
-trait DataframeFunctions extends SparkConfig {
+trait DataframeFunctions {
 
   /**
     * Elimina las filas del primer dataframe que aparecen en el segundo dataframe
@@ -33,7 +33,7 @@ trait DataframeFunctions extends SparkConfig {
     * @param df dataframe
     * @return dataframe without duplicates rows
     */
-  def deleteDuplicates(df: DataFrame): DataFrame = {
+  def deleteDuplicates(df: DataFrame)(implicit spark: SparkSession): DataFrame = {
     val rows = df.collect().toList
     val rowsOutput = rows.foldLeft(List(Row()))((rows, row) => {
       val incomingId = row.getAs[Integer](0)
@@ -182,7 +182,7 @@ object Except extends DfRunner {
 
   df.filter(col("id").isin(listin: _*)).show
 }
-object DeleteDuplicate extends DfRunner {
+object DeleteDuplicate extends DfRunner with SparkConfig {
   val duplicateDf = CreateDataframe.getDuplicateRowDf
 
   val cleaned = deleteDuplicates(duplicateDf)
