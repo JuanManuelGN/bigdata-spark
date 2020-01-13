@@ -22,22 +22,39 @@ class DataFrameFunctionsSpec
 
   it should "Contar la cantidad de unos que hay en cada columna" in {
     val df = CreateDataframe.getCountDf
+    val expected = expectedResults("COUNT")
+
     val response = count(df)
 
     val projection = response.columns.map(c => col(c).cast(IntegerType))
 
     val responseToTest = response.select(projection: _*)
 
-    df.printSchema()
-    response.printSchema()
-    expectedResults("COUNT").printSchema()
-    responseToTest.printSchema()
+//    showAnPrintSchema(List(df, response, countDf, responseToTest))
 
-    df.show
-    response.show
-    expectedResults("COUNT").show
-    responseToTest.show
+    assertDataFrameEquals(responseToTest, expected)
+  }
 
-    assertDataFrameEquals(responseToTest, expectedResults("COUNT"))
+  it should "Comprobar la validez de los datos de una columna" in {
+    val df = CreateDataframe.getValidDf
+    val expected = expectedResults("VALID")
+
+    val response = colIsValid(df.col("col1"))
+    val responseToTest = df.withColumn("isValid", response)
+
+//    showAnPrintSchema(List(df, valid, responseToTest))
+
+    assertDataFrameEquals(responseToTest, expected)
+  }
+
+  it should "Filtra las filas que no cumplan la condición" in {
+    val df = CreateDataframe.getFilterNotEqualDf
+    val expected = expectedResults("FILTER_NOT_EQUAL")
+
+    val response = filterNotEqual(df)
+
+    //    showAnPrintSchema(List(df, valid, responseToTest))
+
+    assertDataFrameEquals(response, expected)
   }
 }

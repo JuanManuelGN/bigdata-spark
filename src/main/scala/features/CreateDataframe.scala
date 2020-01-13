@@ -144,6 +144,10 @@ case class CreateDataframe() extends SparkConfig {
     StructField("col2", IntegerType), StructField("col3", IntegerType)))
   private val countRaw = List(Row(1,1,3), Row(3,2,1), Row(2,5,1), Row(4,1,6))
   private val countDf = spark.createDataFrame(spark.sparkContext.parallelize(countRaw), countSchema)
+
+  private val validSchema = StructType(List(StructField("col1", IntegerType)))
+  private val validRaw = List(Row(1), Row(null), Row(12))
+  private val validDf = spark.createDataFrame(spark.sparkContext.parallelize(validRaw), validSchema)
 }
 
 object CreateDataframe extends App {
@@ -172,6 +176,7 @@ object CreateDataframe extends App {
   def getJoinAndSum2: DataFrame = CreateDataframe().joinAndSum2Df
   def getDecimalTypeDf = CreateDataframe().decimalTypeDf
   def getCountDf = CreateDataframe().countDf
+  def getValidDf = CreateDataframe().validDf
 
   val numberDf = getNumberDF._1
 

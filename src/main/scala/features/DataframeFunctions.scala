@@ -113,7 +113,12 @@ trait DataframeFunctions {
 
   def filterNotEqual(df: DataFrame): DataFrame = df.filter(col("col1") =!= 2)
 
-  def isValid(col: Column): Column = col.isNotNull && !col.equals("")
+  /**
+    * Dada una columna verifica que no es nula ni vacía
+    * @param col
+    * @return Column[Boolean]
+    */
+  def colIsValid(col: Column): Column = col.isNotNull && !col.equals("")
 
   /**
     * Cuenta la cantidad de unos que hay en las columnas de un dataframe, como resultado da otra
@@ -145,7 +150,11 @@ trait DataframeFunctions {
     df.select(projection: _*)
   }
 
-  def showDfs(dfs: List[DataFrame]): Unit = dfs.foreach(df => df.show)
+  def showDfs(dfs: List[DataFrame]): Unit = dfs.foreach(_.show)
+  def showAnPrintSchema(dfs: List[DataFrame]): Unit = {
+    dfs.foreach(_.printSchema)
+    showDfs(dfs)
+  }
 }
 
 trait DfRunner extends App with DataframeFunctions
@@ -249,25 +258,4 @@ object FillNull1 extends DfRunner {
 
   showDfs(List(df, response))
   df.explain(true)
-}
-object FilterNotEqual extends DfRunner {
-  val df: DataFrame = CreateDataframe.getFilterNotEqualDf
-  val response = filterNotEqual(df)
-
-  showDfs(List(df, response))
-}
-object IsValid extends DfRunner {
-  val df = CreateDataframe.getIntDf
-  val response = isValid(df.col("id"))
-
-  val result = df.withColumn("isValid", response)
-
-  showDfs(List(df, result))
-}
-
-object Count extends DfRunner {
-  val df = CreateDataframe.getCountDf
-  val response = count(df)
-
-  showDfs(List(df, response))
 }
