@@ -179,21 +179,6 @@ object Minus extends DfRunner {
 
   showDfs(List(df1, df2, df1Crossdf2, df2Crossdf1, response))
 }
-object Except extends DfRunner {
-  val df = CreateDataframe.getIdDf
-  val emptyDf = df.filter(col("id") === 0)
-  val exceptDf = minus(df, emptyDf)
-
-  df.show
-  emptyDf.show
-  exceptDf.show
-
-  df.union(emptyDf).show
-
-  val listin: List[Int] = List()
-
-  df.filter(col("id").isin(listin: _*)).show
-}
 object DeleteDuplicate extends DfRunner with SparkConfig {
   val duplicateDf = CreateDataframe.getDuplicateRowDf
 

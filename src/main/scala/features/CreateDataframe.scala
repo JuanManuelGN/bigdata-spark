@@ -100,6 +100,10 @@ case class CreateDataframe() extends SparkConfig {
   private val idRaw = List(Row(1))
   private val idDf = spark.createDataFrame(spark.sparkContext.parallelize(idRaw), emptySchema)
 
+  private val exceptSchema = StructType(List(StructField("col1", IntegerType)))
+  private val exceptRaw = List(Row(3), Row(4))
+  private val exceptDf = spark.createDataFrame(spark.sparkContext.parallelize(exceptRaw), exceptSchema)
+
   private val minusSchema =
     StructType(List(StructField("column1", IntegerType), StructField("column2", StringType)))
   private val minus1Raw = List(Row(1, "a"), Row(2, "b"))
@@ -177,6 +181,7 @@ object CreateDataframe extends App {
   def getDecimalTypeDf = CreateDataframe().decimalTypeDf
   def getCountDf = CreateDataframe().countDf
   def getValidDf = CreateDataframe().validDf
+  def getExceptDf = CreateDataframe().exceptDf
 
   val numberDf = getNumberDF._1
 

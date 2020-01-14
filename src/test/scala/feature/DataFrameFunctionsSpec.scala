@@ -57,4 +57,13 @@ class DataFrameFunctionsSpec
 
     assertDataFrameEquals(response, expected)
   }
+
+  it should "DataFrame except DataFrame" in {
+    val df = CreateDataframe.getExceptDf
+    val response = minus(df, df)
+
+//    showAnPrintSchema(List(df, response))
+
+    assert(response.isEmpty)
+  }
 }
