@@ -73,7 +73,7 @@ trait DataframeFunctions {
     * @param x dato a buscar
     * @return
     */
-  def contains(df: DataFrame, x: Int): DataFrame = df.select(col(df.columns.head).contains(x))
+  def contains(df: DataFrame, x: Int, column: String): DataFrame = df.select(col(column).contains(x))
 
   /**
     * Rellena con "s los campos nulos de tipo string y con i los campos nulos de tipo entero
@@ -155,6 +155,9 @@ trait DataframeFunctions {
     dfs.foreach(_.printSchema)
     showDfs(dfs)
   }
+
+  def flatUnion: List[List[DataFrame]] => DataFrame =
+    listOfList => listOfList.flatten.reduce(_ union _)
 }
 
 trait DfRunner extends App with DataframeFunctions
@@ -201,8 +204,9 @@ object DeleteDuplicate extends DfRunner with SparkConfig {
 object Contains extends DfRunner {
   val df = CreateDataframe.getIntDf
   val x = 1
+  val c = "id"
 
-  val response = contains(df, x)
+  val response = contains(df, x, "id")
 
   showDfs(List(df, response))
 }
@@ -255,6 +259,18 @@ object FillNull1 extends DfRunner {
   val default: Map[String, Column] = Map("col1" -> lit(20)/*, "col2" -> lit("patata")*/)
 
   val response: DataFrame = fillNull1(df, default)
+
+  showDfs(List(df, response))
+  df.explain(true)
+}
+
+object FlatUnion extends DfRunner {
+  val df: DataFrame =
+    CreateDataframe.getDfWithNullValues
+      .withColumn("a", lit(5))
+      .withColumn("b", col("a") * 10)
+
+  val response: DataFrame = flatUnion(List(List(df, df), List(df, df)))
 
   showDfs(List(df, response))
   df.explain(true)
