@@ -105,7 +105,7 @@ case class CreateDataframe() extends SparkConfig {
   private val exceptDf = spark.createDataFrame(spark.sparkContext.parallelize(exceptRaw), exceptSchema)
 
   private val minusSchema =
-    StructType(List(StructField("column1", IntegerType), StructField("column2", StringType)))
+    StructType(List(StructField("col1", IntegerType), StructField("col2", StringType)))
   private val minus1Raw = List(Row(1, "a"), Row(2, "b"))
   private val minus2Raw = List(Row(1, "a"))
   private val minus1Df = spark.createDataFrame(spark.sparkContext.parallelize(minus1Raw), minusSchema)

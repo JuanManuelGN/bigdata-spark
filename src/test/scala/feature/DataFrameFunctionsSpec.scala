@@ -62,8 +62,31 @@ class DataFrameFunctionsSpec
     val df = CreateDataframe.getExceptDf
     val response = minus(df, df)
 
-//    showAnPrintSchema(List(df, response))
+    //    showAnPrintSchema(List(df, response))
 
     assert(response.isEmpty)
+  }
+
+  it should "DataFrame minus DataFrame" in {
+    val df1 = CreateDataframe.getMinus1Df
+    val df2 = CreateDataframe.getMinus2Df
+    val expected = expectedResults("MINUS")
+
+    val response = minus(df1, df2)
+
+//    showDfs(List(df1, df2, df1Crossdf2, df2Crossdf1, response))
+
+    assertDataFrameEquals(response, expected)
+  }
+
+  it should "Delete duplicates" in {
+    val df = CreateDataframe.getDuplicateRowDf
+    val expected = expectedResults("NODUPLICATES")
+
+    val response = deleteDuplicates(df)
+
+//    showDfs(List(df, expected, response))
+
+    assertDataFrameEquals(response, expected)
   }
 }

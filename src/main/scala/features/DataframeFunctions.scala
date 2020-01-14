@@ -61,9 +61,9 @@ trait DataframeFunctions {
       }
     }
     )
-    val schema = StructType(List(StructField("column1", IntegerType),
-      StructField("column2", StringType),
-      StructField("date", IntegerType)))
+    val schema = StructType(List(StructField("col1", IntegerType),
+      StructField("col2", StringType),
+      StructField("col3", IntegerType)))
     spark.createDataFrame(spark.sparkContext.parallelize(rowsOutput), schema)
   }
 
@@ -162,39 +162,6 @@ trait DataframeFunctions {
 
 trait DfRunner extends App with DataframeFunctions
 
-object Minus extends DfRunner {
-  val df1 = CreateDataframe.getMinus1Df
-  val df2 = CreateDataframe.getMinus2Df
-
-  val idsDf1 = df1.select("column1").distinct.rdd.map(row => row.getInt(0)).collect()
-  val idsDf2 = df2.select("column1").distinct.rdd.map(row => row.getInt(0)).collect()
-  val sharedIds = idsDf1.toSet.intersect(idsDf2.toSet).toList
-
-  val df1Crossdf2 =
-    df1.filter(col("column1").isin(sharedIds: _*))
-  val df2Crossdf1 =
-    df2.filter(col("column1").isin(sharedIds: _*))
-
-  val response = minus(df1, df2)
-
-  showDfs(List(df1, df2, df1Crossdf2, df2Crossdf1, response))
-}
-object DeleteDuplicate extends DfRunner with SparkConfig {
-  val duplicateDf = CreateDataframe.getDuplicateRowDf
-
-  val cleaned = deleteDuplicates(duplicateDf)
-
-  showDfs(List(duplicateDf, cleaned))
-}
-object Contains extends DfRunner {
-  val df = CreateDataframe.getIntDf
-  val x = 1
-  val c = "id"
-
-  val response = contains(df, x, "id")
-
-  showDfs(List(df, response))
-}
 object FillNull extends DfRunner {
   val df: DataFrame = CreateDataframe.getDfWithNullValues
   val s: String = "XX"
