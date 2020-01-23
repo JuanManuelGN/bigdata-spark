@@ -152,6 +152,14 @@ case class CreateDataframe() extends SparkConfig {
   private val validSchema = StructType(List(StructField("col1", IntegerType)))
   private val validRaw = List(Row(1), Row(null), Row(12))
   private val validDf = spark.createDataFrame(spark.sparkContext.parallelize(validRaw), validSchema)
+
+  private val groupchema =
+    StructType(List(
+      StructField("col1", IntegerType),
+      StructField("col2", StringType),
+      StructField("col3", IntegerType)))
+  private val groupRaw = List(Row(1,"hola",1), Row(2,"adios",2), Row(1,"hello",2),Row(4,"hello",5))
+  private val groupDf = spark.createDataFrame(spark.sparkContext.parallelize(groupRaw), groupchema)
 }
 
 object CreateDataframe extends App {
@@ -182,6 +190,7 @@ object CreateDataframe extends App {
   def getCountDf = CreateDataframe().countDf
   def getValidDf = CreateDataframe().validDf
   def getExceptDf = CreateDataframe().exceptDf
+  def getGroupDf = CreateDataframe().groupDf
 
   val numberDf = getNumberDF._1
 
