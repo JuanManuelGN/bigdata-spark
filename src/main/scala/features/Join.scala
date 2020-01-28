@@ -1,7 +1,7 @@
 package features
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.{col, when}
 
 object Join extends App {
 
@@ -122,5 +122,25 @@ object JoinAndSum extends App {
   val df2 = CreateDataframe.getJoinAndSum2
   val df2Renamed = df2.withColumnRenamed(df2.columns(1), df2.columns(1) + "_")
   val response = JoinAndSum().joinAndSum(df1)(df2Renamed)
+  response.show
+}
+
+/**
+  * dados dos ddfs que se tiene que unir, teniendo en cuenta que el campo por el que se
+  * deben unir difiere en uno de sus valores, PTE y PENDING. Estos valores tienen el
+  * mismo significado porque lo que debería de dar positivo en una comparación, es decir,
+  * PTE = PENDING.
+  * Lo que se va a hacer es modificar el df que contiene en un columna PTE y cambiar todos
+  * los PTE por PENDING para luego hacer el join
+  */
+object JoinAndSustituteValue extends App {
+  val (lookup, df) = CreateDataframe.joinAndSustituteValueDf
+  val response =
+    df.select(col("col11"),
+      when(col("col22") === "PTE", "PENDING")
+        .otherwise(col("col22")).as("col22"),
+      col("col33"))
+      .join(lookup, col("col22") === col("col2"))
+      .select("col11", "col3")
   response.show
 }

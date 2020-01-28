@@ -160,6 +160,24 @@ case class CreateDataframe() extends SparkConfig {
       StructField("col3", IntegerType)))
   private val groupRaw = List(Row(1,"hola",1), Row(2,"adios",2), Row(1,"hello",2),Row(4,"hello",5))
   private val groupDf = spark.createDataFrame(spark.sparkContext.parallelize(groupRaw), groupchema)
+
+  private val joinAndSustituteValueSchema =
+    StructType(List(
+      StructField("col1", IntegerType),
+      StructField("col2", StringType),
+      StructField("col3", IntegerType)))
+  private val joinAndSustituteValueRaw = List(Row(1,"OK",6), Row(2,"KO",2), Row(3,"PENDING",5))
+  private val joinAndSustituteValueDf =
+    spark.createDataFrame(spark.sparkContext.parallelize(joinAndSustituteValueRaw), joinAndSustituteValueSchema)
+
+  private val joinAndSustituteValueSchema2 =
+    StructType(List(
+      StructField("col11", IntegerType),
+      StructField("col22", StringType),
+      StructField("col33", IntegerType)))
+  private val joinAndSustituteValueRaw2 = List(Row(1,"OK",1), Row(2,"KO",2), Row(3,"PTE",2))
+  private val joinAndSustituteValueDf2 =
+    spark.createDataFrame(spark.sparkContext.parallelize(joinAndSustituteValueRaw2), joinAndSustituteValueSchema2)
 }
 
 object CreateDataframe extends App {
@@ -191,6 +209,8 @@ object CreateDataframe extends App {
   def getValidDf = CreateDataframe().validDf
   def getExceptDf = CreateDataframe().exceptDf
   def getGroupDf = CreateDataframe().groupDf
+  def joinAndSustituteValueDf =
+    (CreateDataframe().joinAndSustituteValueDf, CreateDataframe().joinAndSustituteValueDf2)
 
   val numberDf = getNumberDF._1
 
