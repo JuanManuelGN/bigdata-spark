@@ -1,8 +1,10 @@
 package features
 
+import config.SparkConfig
+import org.apache.spark
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.types._
 
 trait DataframeFunctions {
 
@@ -225,4 +227,56 @@ object FlatUnion extends DfRunner {
 
   showDfs(List(df, response))
   df.explain(true)
+}
+
+/**
+  * Prueba el método coalesce: Esta función coge una lista de columas y devuelve la que no sea nula
+  * dando preferencia de izquierda a derecha:
+  * Con los datos (1,null,null) devuelve 1
+  * Con los datos (null,1,null) devuelve 1
+  * Con los datos (null,null,null) devuelve null
+  * Con los datos (3,1,null) devuelve 3
+  */
+object Coalesce extends DfRunner with SparkConfig {
+
+
+  val nullSchemaId =
+    StructType(List(
+      StructField("id", IntegerType),
+      StructField("col1", StringType),
+      StructField("col2", StringType)))
+
+  val incomingRaw = List(
+    Row(1,"r", "A"),
+    Row(2,null, "b"),
+    Row(3,null, null))
+
+  val storedRaw = List(
+    Row(1,"r", "a"),
+    Row(2,"t", "b"))
+
+  val incoming = spark.createDataFrame(spark.sparkContext.parallelize(incomingRaw), nullSchemaId)
+  val stored = spark.createDataFrame(spark.sparkContext.parallelize(storedRaw), nullSchemaId)
+
+  val renamedProjection = incoming.columns.map(c => col(c).alias(c.concat("_")))
+  val incomingRenamed = incoming.select(renamedProjection: _*)
+
+
+  val joinedDf = stored.join(incomingRenamed, col("id") === col("id_"), "full")
+
+  val updatedEntriesProjection = stored.columns.map(column =>
+    coalesce(col(column.concat("_")), col(column)).alias(column)
+  )
+  val updatedDf = joinedDf.select(updatedEntriesProjection: _*)
+
+  val response = fillNull1(updatedDf, Map("col1" -> lit("5"), "col2" -> lit("hola")))
+
+
+  incoming.show
+  stored.show
+  incomingRenamed.show
+  joinedDf.show
+  updatedDf.show
+  response.show
+
 }
