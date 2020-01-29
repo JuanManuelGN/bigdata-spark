@@ -143,12 +143,23 @@ trait DataframeFunctions {
     * |   1|   2|   2|
     * +----+----+----+
     */
-  def count: DataFrame => DataFrame = df => {
+  def countDf: DataFrame => DataFrame = df => {
 
     val columnList = df.columns
     val projection = columnList.map(c => sum(when(col(c) === 1, 1)).as(c))
 
     df.select(projection: _*)
+  }
+
+  def countEquals(df:DataFrame): DataFrame = {
+    val OkValueInt = "r"
+    val countEqualOkValue = (column: String) => count(col(column).equalTo(OkValueInt))
+    val countIsNotNull = (column: String) => count(when(col(column).isNotNull, 1))
+
+    df.groupBy("id")
+      .agg(countEqualOkValue("col1").as("equal"),
+        countIsNotNull("col2").as("notnull"),
+        count("col2").alias("notnullshort")).orderBy("id")
   }
 
   def showDfs(dfs: List[DataFrame]): Unit = dfs.foreach(_.show)
@@ -277,6 +288,29 @@ object Coalesce extends DfRunner with SparkConfig {
   incomingRenamed.show
   joinedDf.show
   updatedDf.show
+  response.show
+
+}
+
+/**
+  * Prueba el método coalesce: Esta función coge una lista de columas y devuelve la que no sea nula
+  * dando preferencia de izquierda a derecha:
+  * Con los datos (1,null,null) devuelve 1
+  * Con los datos (null,1,null) devuelve 1
+  * Con los datos (null,null,null) devuelve null
+  * Con los datos (3,1,null) devuelve 3
+  */
+object CountOk extends DfRunner with SparkConfig {
+
+  val schema = StructType(List(StructField("id", IntegerType), StructField("col1", StringType),
+    StructField("col2", StringType)))
+  val dfRaw = List(Row(1,"r", "A"), Row(2,null, "b"), Row(3,null, null))
+  val df = spark.createDataFrame(spark.sparkContext.parallelize(dfRaw), schema)
+
+  val response = countEquals(df)
+
+
+  df.show
   response.show
 
 }

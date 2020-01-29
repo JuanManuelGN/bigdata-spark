@@ -24,7 +24,7 @@ class DataFrameFunctionsSpec
     val df = CreateDataframe.getCountDf
     val expected = expectedResults("COUNT")
 
-    val response = count(df)
+    val response = countDf(df)
 
     val projection = response.columns.map(c => col(c).cast(IntegerType))
 
