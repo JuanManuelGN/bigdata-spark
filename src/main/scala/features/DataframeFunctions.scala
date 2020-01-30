@@ -153,7 +153,7 @@ trait DataframeFunctions {
 
   def countEquals(df:DataFrame): DataFrame = {
     val OkValueInt = "r"
-    val countEqualOkValue = (column: String) => count(col(column).equalTo(OkValueInt))
+    val countEqualOkValue = (column: String) => count(when(col(column).equalTo(OkValueInt), true))
     val countIsNotNull = (column: String) => count(when(col(column).isNotNull, 1))
 
     df.groupBy("id")
@@ -304,7 +304,7 @@ object CountOk extends DfRunner with SparkConfig {
 
   val schema = StructType(List(StructField("id", IntegerType), StructField("col1", StringType),
     StructField("col2", StringType)))
-  val dfRaw = List(Row(1,"r", "A"), Row(2,null, "b"), Row(3,null, null))
+  val dfRaw = List(Row(1,"r", "A"),Row(1,"t", "A"), Row(2,null, "b"), Row(3,null, null))
   val df = spark.createDataFrame(spark.sparkContext.parallelize(dfRaw), schema)
 
   val response = countEquals(df)
