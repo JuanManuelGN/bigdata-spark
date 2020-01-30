@@ -134,7 +134,7 @@ object JoinAndSum extends App {
   * los PTE por PENDING para luego hacer el join
   */
 object JoinAndSustituteValue extends App {
-  val (lookup, df) = CreateDataframe.joinAndSustituteValueDf
+  val (lookup, df) = CreateDataframe.getJoinAndSustituteValueDf
   val response =
     df.select(col("col11"),
       when(col("col22") === "PTE", "PENDING")
@@ -143,4 +143,17 @@ object JoinAndSustituteValue extends App {
       .join(lookup, col("col22") === col("col2"))
       .select("col11", "col3")
   response.show
+}
+
+object SimpleJoin extends App {
+  val leftDf = CreateDataframe.getSimpleJoinDf
+  val rightDf = leftDf
+
+  val joinDf = leftDf.select("id").join(rightDf, leftDf("id") === rightDf("id"), "left")
+
+  joinDf.show
+
+  val otherDf = CreateDataframe.getJoinAndSustituteValueDf
+
+  joinDf.select(rightDf("id")).show
 }

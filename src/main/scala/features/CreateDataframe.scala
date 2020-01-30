@@ -187,6 +187,15 @@ case class CreateDataframe() extends SparkConfig {
 
   private val nullRawId = List(Row(1,BigDecimal(1), "a"), Row(2,null, "b"), Row(3,BigDecimal(3), null))
   private val nullValuesIdDf = spark.createDataFrame(spark.sparkContext.parallelize(nullRawId), nullSchemaId)
+
+  private val simpleJoinSchema =
+    StructType(List(
+      StructField("id", IntegerType),
+      StructField("col1", DecimalType(10, 3)),
+      StructField("col2", StringType)))
+
+  private val simpleJoinRaw = List(Row(1,BigDecimal(1), "a"), Row(2,null, "b"), Row(3,BigDecimal(3), null))
+  private val simpleJoinDf = spark.createDataFrame(spark.sparkContext.parallelize(nullRawId), nullSchemaId)
 }
 
 object CreateDataframe extends App {
@@ -218,9 +227,10 @@ object CreateDataframe extends App {
   def getValidDf = CreateDataframe().validDf
   def getExceptDf = CreateDataframe().exceptDf
   def getGroupDf = CreateDataframe().groupDf
-  def joinAndSustituteValueDf =
+  def getJoinAndSustituteValueDf =
     (CreateDataframe().joinAndSustituteValueDf, CreateDataframe().joinAndSustituteValueDf2)
   def getnullValuesIdDf = CreateDataframe().nullValuesIdDf
+  def getSimpleJoinDf = CreateDataframe().simpleJoinDf
 
   val numberDf = getNumberDF._1
 
