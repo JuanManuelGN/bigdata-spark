@@ -155,9 +155,9 @@ case class CreateDataframe() extends SparkConfig {
 
   private val groupchema =
     StructType(List(
-      StructField("col1", IntegerType),
-      StructField("col2", StringType),
-      StructField("col3", IntegerType)))
+      StructField("id", IntegerType),
+      StructField("description", StringType),
+      StructField("date", IntegerType)))
   private val groupRaw = List(Row(1,"hola",1), Row(2,"adios",2), Row(1,"hello",2),Row(4,"hello",5))
   private val groupDf = spark.createDataFrame(spark.sparkContext.parallelize(groupRaw), groupchema)
 
@@ -196,6 +196,41 @@ case class CreateDataframe() extends SparkConfig {
 
   private val simpleJoinRaw = List(Row(1,BigDecimal(1), "a"), Row(2,null, "b"), Row(3,BigDecimal(3), null))
   private val simpleJoinDf = spark.createDataFrame(spark.sparkContext.parallelize(nullRawId), nullSchemaId)
+
+  private val whenIncomingSchema =
+    StructType(List(
+      StructField("idIncoming", IntegerType),
+      StructField("result", StringType),
+      StructField("type", StringType)))
+
+  private val whenIncomingJoinRaw =
+    List(Row(1, "KO", "manual"), Row(2,"OK", "manual"), Row(3, "PTE", null), Row(3, "OK", "manual"),
+      Row(4, "OK", "automatic"), Row(5, "PTE", null), Row(5, "KO", "automatic"), Row(6, "OK", null),
+      Row(8, "PTE", null))
+  private val whenIncomingJoinDf = spark.createDataFrame(spark.sparkContext.parallelize(whenIncomingJoinRaw), whenIncomingSchema)
+
+  private val whenStoredSchema =
+    StructType(List(StructField("idStored", IntegerType),StructField("nAppReason", StringType)))
+
+  private val whenStoredJoinRaw = List(Row(1, "PTE"), Row(2, null), Row(4, "PTE"), Row(5, null), Row(7, "PTE"))
+  private val whenStoredJoinDf = spark.createDataFrame(spark.sparkContext.parallelize(whenStoredJoinRaw), whenStoredSchema)
+
+  private val joinReduceSchema = StructType(List(
+    StructField("id", IntegerType),
+    StructField("col1", StringType)))
+  private val joinReduceRaw1 = List(Row(1, "PTE"), Row(2, null), Row(4, "PTE"), Row(5, null), Row(7, "PTE"))
+  private val joinReduceDf1 = spark.createDataFrame(spark.sparkContext.parallelize(joinReduceRaw1), joinReduceSchema)
+  private val joinReduceRaw2 = List(Row(2, "KKK"), Row(4, "PTE"), Row(5, null), Row(10, "PTE"))
+  private val joinReduceDf2 = spark.createDataFrame(spark.sparkContext.parallelize(joinReduceRaw2), joinReduceSchema)
+  private val joinReduceDfList = List(joinReduceDf1, joinReduceDf2)
+
+  private val redundantSelectSchema = StructType(List(
+    StructField("id", IntegerType),
+    StructField("col1", StringType)))
+  private val redundantSelectRaw =
+    List(Row(1, "PTE"), Row(1, null), Row(4, "PTE"), Row(5, null), Row(5, "PTE"))
+  private val redundantSelect =
+    spark.createDataFrame(spark.sparkContext.parallelize(redundantSelectRaw), redundantSelectSchema)
 }
 
 object CreateDataframe extends App {
@@ -231,6 +266,9 @@ object CreateDataframe extends App {
     (CreateDataframe().joinAndSustituteValueDf, CreateDataframe().joinAndSustituteValueDf2)
   def getnullValuesIdDf = CreateDataframe().nullValuesIdDf
   def getSimpleJoinDf = CreateDataframe().simpleJoinDf
+  def getWhenDfs = (CreateDataframe().whenIncomingJoinDf, CreateDataframe().whenStoredJoinDf)
+  def getJoinReduce: List[DataFrame] = CreateDataframe().joinReduceDfList
+  def getRedundantSelect: DataFrame = CreateDataframe().redundantSelect
 
   val numberDf = getNumberDF._1
 

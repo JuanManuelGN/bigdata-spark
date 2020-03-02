@@ -1,7 +1,7 @@
 package features
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.{col, when}
+import org.apache.spark.sql.functions.{col, when, concat_ws, explode, collect_set}
 
 object Join extends App {
 
@@ -156,4 +156,117 @@ object SimpleJoin extends App {
   val otherDf = CreateDataframe.getJoinAndSustituteValueDf
 
   joinDf.select(rightDf("id")).show
+}
+
+object When extends App {
+  val (incoming, stored) = CreateDataframe.getWhenDfs
+
+//  val newPte = incoming
+//      .filter(col("result") === "PTE")
+//      .select(col("idIncoming").alias("idPte"),
+//        col("result").alias("nAppReasonPteNew"))
+
+//  val nAppReason =
+//    incoming
+//      .join(newPte, col("idIncoming") === col("idPte"), "left")
+//      .join(stored, col("idIncoming") === col("idStored"), "left").orderBy("idIncoming")
+//      .select(col("idIncoming").alias("id"),
+//        when(stored("nAppReason") === "PTE" || newPte("nAppReasonPteNew") === "PTE",
+//          when(incoming("result") === "OK",
+//            when(incoming("type") === "manual", 6 /* ok pending manual */)
+//              .when(incoming("type") === "automatic", 7 /* ok pending aut */))
+//            .when(incoming("result") === "KO",
+//              when(incoming("type") === "manual", 3 /* ko pending manual */)
+//                .when(incoming("type") === "automatic", 4 /* ko pending aut */)))
+//          .when(stored("nAppReason").isNull &&
+//            incoming("result") === "OK", 5 /* okdirect */)
+//          .alias("nAppReason")).filter(col("nAppReason").isNotNull)
+
+
+  val incomingOnlyPTE =
+    incoming.filter(col("result") === "PTE")
+      .select(col("idIncoming"),
+        col("result").alias("incomingPte"))
+
+  val sResultType = incoming
+      .filter(col("result") === "OK" ||col("result") === "KO")
+      .join(incomingOnlyPTE, Seq("idIncoming"),"full")
+      .orderBy("idIncoming")
+      .select(col("idIncoming").alias("id"),
+        when(col("incomingPte") === "PTE" && col("result").isNotNull, col("result"))
+          .when(col("incomingPte").isNull, col("result"))
+          .when(col("result").isNull, col("incomingPte"))
+          .alias("s_result"))
+        .filter(col("s_result").isNotNull)
+
+  val sResult = incoming
+    .filter(col("result") === "OK" ||col("result") === "KO")
+    .join(incomingOnlyPTE, Seq("idIncoming"),"full")
+    .join(stored, col("idIncoming") === col("idStored"), "left").orderBy("idIncoming")
+    .select(col("idIncoming").alias("id"),
+      when(col("incomingPte") === "PTE",
+        when(col("result") === "OK" || col("result") === "KO",
+          when(col("type") === "manual", "PENDING MANUAL").otherwise("AUTOMATIC"))
+          .otherwise(when(col("result").isNull, "hola")))
+        .when(col("incomingPte").isNull,
+          when(col("result") === "OK" || col("result") === "KO",
+            when(col("nAppReason") === "PTE",
+              when(col("type") === "manual", "PENDING MANUAL").otherwise("AUTOMATIC"))
+          .otherwise(when(col("nAppReason").isNull,when(col("result") === "OK", "DIRECT")))))
+        .alias("s_result"))
+    .filter(col("s_result").isNotNull)
+
+  val sResultOptimus = incoming
+    .filter(col("result") === "OK" ||col("result") === "KO")
+    .join(incomingOnlyPTE, Seq("idIncoming"),"full")
+    .join(stored, col("idIncoming") === col("idStored"), "left").orderBy("idIncoming")
+    .select(col("idIncoming").alias("id"),
+      when(col("incomingPte") === "PTE",
+        when(col("result") === "OK" || col("result") === "KO",
+          when(col("type") === "manual", "PENDING MANUAL").otherwise("AUTOMATIC"))
+          .otherwise(when(col("result").isNull, "hola")))
+        .when(col("incomingPte").isNull,
+          when(col("nAppReason") === "PTE",
+            when(col("type") === "manual", "PENDING MANUAL").otherwise("AUTOMATIC"))
+            .otherwise(when(col("nAppReason").isNull,when(col("result") === "OK", "DIRECT"))))
+        .alias("s_result"))
+    .filter(col("s_result").isNotNull)
+
+
+//  val oneColumn =
+//    incoming
+//      .join(stored, col("idIncoming") === col("idStored"), "left")
+//      .withColumn("concat", concat_ws("|", col("nAppReason"), col("result")))
+//      .groupBy("idIncoming", "concat").agg(concat_ws("|",col("concat")))
+//
+//  val result = incoming
+//    .join(stored, col("idIncoming") === col("idStored"), "left")
+//    .withColumn("concat", concat_ws("|", col("nAppReason"), col("result")))
+//    .withColumn("device", explode(col("concat")))
+//    .groupBy("acct")
+//    .agg(collect_set("device"))
+
+//  sResultType.show
+  sResult.show
+//  oneColumn.show
+//  result.show
+
+
+//  incoming.show
+//  stored.show
+//  nAppReason.show
+//  sResultType.show
+//  sResult.show
+//  result.show
+}
+
+trait Join {
+  def joinReduce(dfs: List[DataFrame]): DataFrame = {
+    dfs.reduceLeft((acc, incoming) => acc.join(incoming, Seq("id"), "full"))
+  }
+}
+object JoinReduce extends App with Join {
+  val response = joinReduce(CreateDataframe.getJoinReduce)
+
+  response.show
 }

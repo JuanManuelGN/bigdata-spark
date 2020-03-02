@@ -1,5 +1,7 @@
 package features
 
+import java.util
+
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
@@ -11,9 +13,9 @@ trait Group {
     * fecha mas alta
     */
   def groupByMaxDate(df: DataFrame): DataFrame = {
-    df.groupBy(col("col1"))
-      .agg(max(col("col3")).as("col3"))
-      .join(df, Seq("col1","col3")).select("col1", "col2")
+    df.groupBy(col("id"))
+      .agg(max(col("date")).as("date"))
+      .join(df, Seq("id","date")).select("id", "description")
   }
 
 }
@@ -23,6 +25,7 @@ object GroupByMaxDate extends App with Group {
 
   val response = groupByMaxDate(df)
 
-  df.show
-  response.show
+  Df.showAnPrintSchema(List(df, response))
 }
+
+
