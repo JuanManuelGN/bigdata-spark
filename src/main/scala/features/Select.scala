@@ -12,7 +12,7 @@ trait Select {
       lit(-9999).as("NReturnReason"))
     df
       .select("id")
-      .distinct()
+      .distinct
       .select(projection: _*)
   }
 
