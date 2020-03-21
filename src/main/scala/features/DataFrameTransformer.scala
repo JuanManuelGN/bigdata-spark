@@ -2,7 +2,47 @@ package features
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{IntegerType, LongType, StringType}
+import org.apache.spark.sql.types.{DataType, IntegerType, LongType, StringType}
+
+trait DataFrameTransformer {
+  /**
+    * Renombra y castea las columnas de una dataframe usando un foldleft y withColumn
+    * @param df DataFrame
+    * @param colsAndCast Mapa con las columnas y el tipo que tiene que procesar
+    * @return DataFrame
+    */
+  def renameAndCastFoldLeft(df: DataFrame, colsAndCast: Map[String, DataType]): DataFrame =
+    colsAndCast.foldLeft(df) { (tmpDf, mapping) =>
+      tmpDf.withColumn(mapping._1, col(mapping._1).cast(mapping._2))
+    }
+  /**
+    * Renombra y castea las columnas de una dataframe usando un map y proyección
+    * @param df DataFrame
+    * @param colsAndCast Mapa con las columnas y el tipo que tiene que procesar
+    * @return DataFrame
+    */
+  def renameAndCastMap(df: DataFrame, colsAndCast: Map[String, DataType]): DataFrame = {
+    val projection =
+      df.columns.toList.diff(colsAndCast.keys.toList).map(col) ++
+        colsAndCast.map(mapping => col(mapping._1).cast(mapping._2).alias(mapping._1)).toSeq
+    df.select(projection: _*)
+      .select(df.columns.map(col): _*)
+  }
+}
+
+object RenameAndCast extends App with DataFrameTransformer with DataframeFunctions {
+  val df = CreateDataframe.getRenameAndCast
+  val renameAndCast: Map[String, DataType] = Map(
+    "id" -> LongType,
+    "col1" -> LongType,
+    "col2" -> StringType
+  )
+  val responseFoldLeft = renameAndCastFoldLeft(df, renameAndCast)
+  val responseMap = renameAndCastMap(df, renameAndCast)
+
+  showAnPrintSchema(List(df, responseFoldLeft, responseMap))
+}
+
 
 class TimeTransformer {
   /**

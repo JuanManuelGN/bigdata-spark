@@ -231,6 +231,27 @@ case class CreateDataframe() extends SparkConfig {
     List(Row(1, "PTE"), Row(1, null), Row(4, "PTE"), Row(5, null), Row(5, "PTE"))
   private val redundantSelect =
     spark.createDataFrame(spark.sparkContext.parallelize(redundantSelectRaw), redundantSelectSchema)
+
+  private val addSumColDfSchema = StructType(List(
+    StructField("id", IntegerType),
+    StructField("col1", IntegerType),
+    StructField("col2", IntegerType)
+  ))
+  private val addSumColDfRaw =
+    List(Row(1, 1, 5), Row(2, 2, 5), Row(3, 1, 5), Row(4, 1, 7), Row(5, 3, 7))
+  private val addSumColDf =
+    spark.createDataFrame(spark.sparkContext.parallelize(addSumColDfRaw), addSumColDfSchema)
+
+  private val renameAndCastDfSchema = StructType(List(
+    StructField("id", IntegerType),
+    StructField("col1", IntegerType),
+    StructField("col2", IntegerType),
+    StructField("col3", IntegerType)
+  ))
+  private val renameAndCastDfRaw =
+    List(Row(1, 1, 5, 8), Row(2, 2, 5, 9), Row(3, 1, 5, 3), Row(4, 1, 7, 5), Row(5, 3, 7, 6))
+  private val renameAndCastDf =
+    spark.createDataFrame(spark.sparkContext.parallelize(renameAndCastDfRaw), renameAndCastDfSchema)
 }
 
 object CreateDataframe extends App {
@@ -269,6 +290,8 @@ object CreateDataframe extends App {
   def getWhenDfs = (CreateDataframe().whenIncomingJoinDf, CreateDataframe().whenStoredJoinDf)
   def getJoinReduce: List[DataFrame] = CreateDataframe().joinReduceDfList
   def getRedundantSelect: DataFrame = CreateDataframe().redundantSelect
+  def getAddSumColDf: DataFrame = CreateDataframe().addSumColDf
+  def getRenameAndCast: DataFrame = CreateDataframe().renameAndCastDf
 
   val numberDf = getNumberDF._1
 
