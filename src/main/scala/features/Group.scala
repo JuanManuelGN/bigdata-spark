@@ -8,7 +8,7 @@ import org.apache.spark.sql.functions._
 trait Group {
 
   /**
-    * Dado un dataframe con 3 campos (id, descripción, fecha) elegir el id y la descrioción. Si
+    * Dado un dataframe con 3 campos (id, descripción, fecha) elegir el id y la descripción. Si
     * hubiera mas de un registro para un mismo id coger el id y la descripción del que tenga la
     * fecha mas alta
     */

@@ -252,6 +252,22 @@ case class CreateDataframe() extends SparkConfig {
     List(Row(1, 1, 5, 8), Row(2, 2, 5, 9), Row(3, 1, 5, 3), Row(4, 1, 7, 5), Row(5, 3, 7, 6))
   private val renameAndCastDf =
     spark.createDataFrame(spark.sparkContext.parallelize(renameAndCastDfRaw), renameAndCastDfSchema)
+
+  private val addColumnProjectionLSchema = StructType(List(
+    StructField("id", IntegerType),
+    StructField("description", StringType)))
+  private val addColumnProjectionLRaw =
+    List(Row(1, "OK"), Row(2, "KO"))
+  private val addColumnProjectionLDf =
+    spark.createDataFrame(spark.sparkContext.parallelize(addColumnProjectionLRaw), addColumnProjectionLSchema)
+
+  private val addColumnProjectionSchema = StructType(List(
+    StructField("count", IntegerType)))
+  private val addColumnProjectionRaw =
+    List(Row(25), Row(2))
+  private val addColumnProjectionDf =
+    spark.createDataFrame(spark.sparkContext.parallelize(addColumnProjectionRaw), addColumnProjectionSchema)
+
 }
 
 object CreateDataframe extends App {
@@ -292,6 +308,8 @@ object CreateDataframe extends App {
   def getRedundantSelect: DataFrame = CreateDataframe().redundantSelect
   def getAddSumColDf: DataFrame = CreateDataframe().addSumColDf
   def getRenameAndCast: DataFrame = CreateDataframe().renameAndCastDf
+  def getAddColumnProjectionL: DataFrame = CreateDataframe().addColumnProjectionLDf
+  def getAddColumnProjection: DataFrame = CreateDataframe().addColumnProjectionDf
 
   val numberDf = getNumberDF._1
 
