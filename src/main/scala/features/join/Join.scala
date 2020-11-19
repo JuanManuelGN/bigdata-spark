@@ -2,7 +2,6 @@ package features.join
 
 import config.SparkConfig
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions.col
 
 case class Join() {
 
@@ -31,6 +30,7 @@ object Join extends SparkConfig with App {
     (0, "cero"),
     (1, "uno"),
     (2, "dos"),
+    (2, "two"),
     (4, "cuatro")
   ).toDF("id", "df2_c2")
 
@@ -40,6 +40,15 @@ object Join extends SparkConfig with App {
 //  val rightJoinDf = Join().rightJoin(List(df1, df2): _*)
 //  rightJoinDf.show
 
-  val innerJoinDf = Join().innerJoin(List(df1, df2, df1): _*)
+  val innerJoinDf = Join().innerJoin(List(df1, df2): _*)
   innerJoinDf.show
+  /**
+    * +---+---+---+------+------+------+
+    * | id| id| id|df1_c2|df2_c2|df1_c2|
+    * +---+---+---+------+------+------+
+    * |  0|  0|  0|     0|  cero|     0|
+    * |  1|  1|  1|     1|   uno|     1|
+    * |  2|  2|  2|     2|   dos|     2|
+    * +---+---+---+------+------+------+
+    */
 }
