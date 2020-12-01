@@ -302,15 +302,21 @@ object Coalesce extends DfRunner with SparkConfig {
   */
 object CountOk extends DfRunner with SparkConfig {
 
-  val schema = StructType(List(StructField("id", IntegerType), StructField("col1", StringType),
+  val schema = StructType(List(
+    StructField("id", IntegerType),
+    StructField("col1", StringType),
     StructField("col2", StringType)))
-  val dfRaw = List(Row(1,"r", "A"),Row(1,"t", "A"), Row(2,null, "b"), Row(3,null, null))
+
+  val dfRaw = List(
+    Row(1,"r", "A"),
+    Row(1,"t", "A"),
+    Row(2,null, "b"),
+    Row(3,null, null))
+
   val df = spark.createDataFrame(spark.sparkContext.parallelize(dfRaw), schema)
 
   val response = countEquals(df)
 
-
-  df.show
-  response.show
+  showAnPrintSchema(List(df, response))
 
 }
