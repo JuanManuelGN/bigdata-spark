@@ -8,5 +8,6 @@ trait SparkConfig {
     SparkSession.builder()
       .appName("jeje")
       .config("spark.master", "local")
+      .config("spark.sql.session.timeZone", "UTC")
       .getOrCreate()
 }
