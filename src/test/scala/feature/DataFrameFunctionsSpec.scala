@@ -32,6 +32,8 @@ class DataFrameFunctionsSpec
 
     val responseToTest = response.select(projection: _*)
 
+    spark.time(response.show)
+
 //    showAnPrintSchema(List(df, response, expected, responseToTest))
 
     assertDataFrameEquals(responseToTest, expected)

@@ -5,6 +5,8 @@ import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions._
 
+import scala.util.Random
+
 /**
   * En esta clase está centralizada la creación de los dataframes que el resto de componentes van
   * a necesitar para su ejecución
@@ -147,7 +149,9 @@ case class CreateDataframe() extends SparkConfig {
   private def countSchema = StructType(List(StructField("col1", IntegerType),
     StructField("col2", IntegerType), StructField("col3", IntegerType)))
   private val countRaw = List(Row(1,1,3), Row(3,2,1), Row(2,5,1), Row(4,1,6))
-  private val countDf = spark.createDataFrame(spark.sparkContext.parallelize(countRaw), countSchema)
+  val r = scala.util.Random
+  val countRawMonster = (1 to 1000000).map(_ => Row(r.nextInt(10), r.nextInt(10), r.nextInt(10)))
+  val countDf = spark.createDataFrame(spark.sparkContext.parallelize(countRawMonster), countSchema)
 
   private val validSchema = StructType(List(StructField("col1", IntegerType)))
   private val validRaw = List(Row(1), Row(null), Row(12))
