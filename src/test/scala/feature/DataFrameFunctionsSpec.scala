@@ -21,16 +21,18 @@ class DataFrameFunctionsSpec
   lazy val expectedResults: Map[String, DataFrame] = TestingUtils.loadExpectedLookupDfs
 
   it should "Contar la cantidad de unos que hay en cada columna" in {
-    val df = CreateDataframe.getCountDf
+
     val expected = expectedResults("COUNT")
 
-    val response = countDf(df)
+    val df = CreateDataframe.getCountDf
+
+    val response = countOcurrencesEachCol(df, 1)
 
     val projection = response.columns.map(c => col(c).cast(IntegerType))
 
     val responseToTest = response.select(projection: _*)
 
-//    showAnPrintSchema(List(df, response, countDf, responseToTest))
+//    showAnPrintSchema(List(df, response, expected, responseToTest))
 
     assertDataFrameEquals(responseToTest, expected)
   }

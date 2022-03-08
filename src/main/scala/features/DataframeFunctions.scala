@@ -123,8 +123,8 @@ trait DataframeFunctions {
 
   /**
     * Cuenta la cantidad de unos que hay en las columnas de un dataframe, como resultado da otra
-    * dataframe con la misma cantidad de columnas con una única fila que contiene el número de unos
-    * de cada columna
+    * dataframe con la misma cantidad de columnas con una única fila que contiene la cantidad de
+    * elementos encontrados en cada columna
     *
     * @return
     *
@@ -143,10 +143,10 @@ trait DataframeFunctions {
     * |   1|   2|   2|
     * +----+----+----+
     */
-  def countDf: DataFrame => DataFrame = df => {
+  def countOcurrencesEachCol(df: DataFrame, n: Int): DataFrame = {
 
     val columnList = df.columns
-    val projection = columnList.map(c => sum(when(col(c) === 1, 1)).as(c))
+    val projection = columnList.map(c => sum(when(col(c) === n, 1)).as(c))
 
     df.select(projection: _*)
   }
