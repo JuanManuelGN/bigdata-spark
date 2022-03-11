@@ -38,7 +38,7 @@ object RedundantSelect extends App with Select {
   val response = redundantSelect(df)
   val responseNotRedundant = notRedundantSelect(df)
 
-  Df.showAnPrintSchema(List(df, response, responseNotRedundant))
+  DfPrinter.showAnPrintSchema(List(df, response, responseNotRedundant))
 }
 
 object AddColumnProjection extends App with Select {
@@ -46,5 +46,5 @@ object AddColumnProjection extends App with Select {
   val df = CreateDataframe.getAddColumnProjection
   val response = df.select(addColumnProjection(lookup): _*)
 
-  Df.showAnPrintSchema(List(lookup, df, response))
+  DfPrinter.showAnPrintSchema(List(lookup, df, response))
 }

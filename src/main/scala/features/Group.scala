@@ -25,7 +25,7 @@ object GroupByMaxDate extends App with Group {
 
   val response = groupByMaxDate(df)
 
-  Df.showAnPrintSchema(List(df, response))
+  DfPrinter.showAnPrintSchema(List(df, response))
 }
 
 
