@@ -1,4 +1,4 @@
-package feature
+package features
 
 import com.holdenkarau.spark.testing.DataFrameSuiteBase
 import features.{CreateDataframe, DataframeFunctions}
